@@ -1310,3 +1310,154 @@
   line-height: 14px;
   margin: 8px 0 0 341px;
 }
+
+/* Address modal + address item actions (shared add/edit dialog). */
+.addr-item-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.addr-edit-btn {
+  color: rgba(59, 131, 246, 1);
+  font-size: 14px;
+  font-family: PingFang HK-Medium;
+  font-weight: 500;
+  width: 28px;
+  height: 20px;
+  display: inline-block;
+  text-align: right;
+  white-space: nowrap;
+  line-height: 14px;
+  cursor: pointer;
+}
+
+.addr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: none;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 24px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.addr-modal-panel {
+  width: 595px;
+  max-width: calc(100vw - 48px);
+  height: min(1032px, calc(100vh - 48px));
+  overflow: auto;
+  background: rgba(255, 255, 255, 1);
+  border-radius: 16px;
+  box-sizing: border-box;
+  padding: 24px;
+}
+
+.addr-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.addr-modal-title {
+  color: rgba(24, 31, 39, 1);
+  font-size: 18px;
+  font-family: PingFang HK-Semibold;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 18px;
+}
+
+.addr-modal-close {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 24px;
+  color: rgba(24, 31, 39, 1);
+}
+
+.addr-modal-form {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addr-modal-row {
+  display: flex;
+  gap: 12px;
+}
+
+.addr-modal-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.addr-modal-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(0, 0, 0, 1);
+  font-size: 14px;
+  font-family: PingFang SC-Regular;
+  line-height: 16px;
+}
+
+.addr-modal-label .req {
+  color: rgba(247, 63, 123, 1);
+}
+
+.addr-modal-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: rgba(242, 243, 247, 1);
+  font-size: 14px;
+  outline: none;
+}
+
+.addr-modal-input:focus {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(59, 131, 246, 0.55);
+}
+
+.addr-modal-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.addr-modal-cancel,
+.addr-modal-submit {
+  flex: 1;
+  height: 50px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: PingFang HK-Medium;
+  font-weight: 500;
+}
+
+.addr-modal-cancel {
+  background: rgba(242, 243, 247, 1);
+  color: rgba(24, 31, 39, 1);
+}
+
+.addr-modal-submit {
+  background: rgba(59, 131, 246, 1);
+  color: rgba(255, 255, 255, 1);
+}

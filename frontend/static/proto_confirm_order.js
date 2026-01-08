@@ -48,6 +48,289 @@
     return confirm("确认删除该地址？");
   }
 
+  function ensureAddressModal() {
+    var modalId = "picaiAddressUpsertModal";
+    var modal = document.getElementById(modalId);
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = modalId;
+    modal.className = "addr-modal-overlay";
+    modal.style.display = "none";
+    modal.innerHTML =
+      "" +
+      '<div class="addr-modal-panel" role="dialog" aria-modal="true">' +
+      '  <div class="addr-modal-header">' +
+      '    <div class="addr-modal-title" data-role="title">新增地址</div>' +
+      '    <button type="button" class="addr-modal-close" data-role="close" aria-label="关闭">×</button>' +
+      "  </div>" +
+      '  <form class="addr-modal-form" data-role="form">' +
+      '    <div class="addr-modal-row">' +
+      '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span class="req">*</span><span>收件人姓名</span></div>' +
+      '        <input class="addr-modal-input" data-role="name" autocomplete="name" />' +
+      "      </div>" +
+      '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span>收件公司名称</span></div>' +
+      '        <input class="addr-modal-input" data-role="company" autocomplete="organization" />' +
+      "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-row">' +
+      '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span class="req">*</span><span>手机号</span></div>' +
+      '        <input class="addr-modal-input" data-role="mobile" autocomplete="tel" />' +
+      "      </div>" +
+      '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span>收件电话</span></div>' +
+      '        <input class="addr-modal-input" data-role="phone" autocomplete="tel" />' +
+      "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-row">' +
+      '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span class="req">*</span><span>国家三字码</span></div>' +
+      '        <input class="addr-modal-input" data-role="countryCode" placeholder="如：MEX" />' +
+      "      </div>" +
+      '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span class="req">*</span><span>邮政编码</span></div>' +
+      '        <input class="addr-modal-input" data-role="postCode" autocomplete="postal-code" />' +
+      "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-row">' +
+      '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span class="req">*</span><span>州/省</span></div>' +
+      '        <input class="addr-modal-input" data-role="prov" />' +
+      "      </div>" +
+      '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span class="req">*</span><span>城市</span></div>' +
+      '        <input class="addr-modal-input" data-role="city" />' +
+      "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-row">' +
+      '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span class="req">*</span><span>区域</span></div>' +
+      '        <input class="addr-modal-input" data-role="area" />' +
+      "      </div>" +
+      '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span class="req">*</span><span>详细地址</span></div>' +
+      '        <input class="addr-modal-input" data-role="address" autocomplete="street-address" />' +
+      "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-actions">' +
+      '      <button type="button" class="addr-modal-cancel" data-role="cancel">取消</button>' +
+      '      <button type="submit" class="addr-modal-submit" data-role="submit">确认</button>' +
+      "    </div>" +
+      "  </form>" +
+      "</div>";
+
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  function ensureAddressSubmittingMask() {
+    var maskId = "picaiAddressSubmittingMask";
+    var mask = document.getElementById(maskId);
+    if (mask) return mask;
+
+    mask = document.createElement("div");
+    mask.id = maskId;
+    mask.style.position = "fixed";
+    mask.style.inset = "0";
+    mask.style.zIndex = "10060";
+    mask.style.display = "none";
+    mask.style.alignItems = "center";
+    mask.style.justifyContent = "center";
+    mask.style.background = "rgba(0,0,0,0.55)";
+    mask.style.padding = "24px";
+
+    var panel = document.createElement("div");
+    panel.style.width = "min(360px, 92vw)";
+    panel.style.background = "rgba(255,255,255,0.98)";
+    panel.style.border = "1px solid rgba(0,0,0,0.08)";
+    panel.style.borderRadius = "14px";
+    panel.style.boxShadow = "0 18px 60px rgba(0,0,0,0.22)";
+    panel.style.padding = "18px";
+    panel.style.fontFamily =
+      "system-ui, -apple-system, Segoe UI, Roboto, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif";
+
+    var text = document.createElement("div");
+    text.textContent = "正在提交…";
+    text.style.fontSize = "14px";
+    text.style.color = "#1f2a44";
+    text.style.lineHeight = "1.5";
+    text.style.wordBreak = "break-word";
+    text.style.textAlign = "center";
+
+    panel.appendChild(text);
+    mask.appendChild(panel);
+    document.body.appendChild(mask);
+    return mask;
+  }
+
+  function setAddressSubmitting(isSubmitting) {
+    var mask = ensureAddressSubmittingMask();
+    mask.style.display = isSubmitting ? "flex" : "none";
+  }
+
+  function openAddressModal(opts) {
+    opts = opts || {};
+    var mode = opts.mode || "add";
+    var initial = opts.initial || {};
+    var modal = ensureAddressModal();
+
+    function qs(role) {
+      return modal.querySelector("[data-role='" + role + "']");
+    }
+
+    var titleEl = qs("title");
+    var closeBtn = qs("close");
+    var cancelBtn = qs("cancel");
+    var form = qs("form");
+    var submitBtn = qs("submit");
+
+    var nameEl = qs("name");
+    var companyEl = qs("company");
+    var mobileEl = qs("mobile");
+    var phoneEl = qs("phone");
+    var countryCodeEl = qs("countryCode");
+    var postCodeEl = qs("postCode");
+    var provEl = qs("prov");
+    var cityEl = qs("city");
+    var areaEl = qs("area");
+    var addressEl = qs("address");
+
+    if (titleEl) titleEl.textContent = mode === "edit" ? "编辑地址" : "新增地址";
+    if (submitBtn) submitBtn.textContent = mode === "edit" ? "保存" : "确认";
+
+    function setVal(el, v) {
+      if (!el) return;
+      el.value = v == null ? "" : String(v);
+    }
+
+    setVal(nameEl, initial.name || "");
+    setVal(companyEl, initial.company || "");
+    setVal(mobileEl, initial.mobile || initial.phone || "");
+    setVal(phoneEl, initial.phone || "");
+    setVal(countryCodeEl, initial.countryCode || initial.country_code || "MEX");
+    setVal(postCodeEl, initial.postCode || initial.post_code || "");
+    setVal(provEl, initial.prov || "");
+    setVal(cityEl, initial.city || "");
+    setVal(areaEl, initial.area || "");
+    setVal(addressEl, initial.address || "");
+
+    modal.style.display = "flex";
+    setTimeout(function () {
+      if (nameEl) nameEl.focus();
+    }, 0);
+
+    return new Promise(function (resolve) {
+      function cleanup() {
+        modal.removeEventListener("click", onOverlayClick);
+        if (closeBtn) closeBtn.removeEventListener("click", onCancel);
+        if (cancelBtn) cancelBtn.removeEventListener("click", onCancel);
+        if (form) form.removeEventListener("submit", onSubmit);
+        document.removeEventListener("keydown", onKeydown);
+      }
+
+      function close(result) {
+        cleanup();
+        modal.style.display = "none";
+        resolve(result || null);
+      }
+
+      function onOverlayClick(e) {
+        if (e.target === modal) close(null);
+      }
+
+      function onKeydown(e) {
+        if (e.key === "Escape") close(null);
+      }
+
+      function onCancel(e) {
+        e.preventDefault();
+        close(null);
+      }
+
+      function readTrim(el) {
+        return (el && el.value ? String(el.value) : "").trim();
+      }
+
+      function onSubmit(e) {
+        e.preventDefault();
+        var values = {
+          name: readTrim(nameEl),
+          company: readTrim(companyEl),
+          mobile: readTrim(mobileEl),
+          phone: readTrim(phoneEl),
+          countryCode: readTrim(countryCodeEl) || "MEX",
+          postCode: readTrim(postCodeEl),
+          prov: readTrim(provEl),
+          city: readTrim(cityEl),
+          area: readTrim(areaEl),
+          address: readTrim(addressEl),
+        };
+
+        if (!values.name) return showMsg("请填写收件人姓名");
+        if (!values.mobile && !values.phone) return showMsg("手机号/收件电话至少填写一个");
+        if (!values.postCode) return showMsg("请填写邮政编码");
+        if (!values.prov) return showMsg("请填写州/省");
+        if (!values.city) return showMsg("请填写城市");
+        if (!values.area) return showMsg("请填写区域");
+        if (!values.address) return showMsg("请填写详细地址");
+
+        close(values);
+      }
+
+      modal.addEventListener("click", onOverlayClick);
+      if (closeBtn) closeBtn.addEventListener("click", onCancel);
+      if (cancelBtn) cancelBtn.addEventListener("click", onCancel);
+      if (form) form.addEventListener("submit", onSubmit);
+      document.addEventListener("keydown", onKeydown);
+    });
+  }
+
+  async function upsertAddress(mode, existingAddress) {
+    var values = await openAddressModal({ mode: mode, initial: existingAddress || {} });
+    if (!values) return;
+
+    var action = mode === "edit" ? "receiver_edit" : "receiver_add";
+    var mobileOrPhone = values.mobile || values.phone || "";
+    var payload = {
+      name: values.name,
+      company: values.company || "",
+      postCode: values.postCode,
+      mailBox: "",
+      mobile: values.mobile || mobileOrPhone,
+      phone: values.phone || mobileOrPhone,
+      countryCode: values.countryCode,
+      prov: values.prov,
+      city: values.city,
+      area: values.area,
+      address: values.address,
+    };
+    if (mode === "edit" && existingAddress && existingAddress.address_id != null) {
+      payload.address_id = Number(existingAddress.address_id);
+    }
+
+    setAddressSubmitting(true);
+    try {
+      var resp = await $.apiPost("/api/wholesales/users.php?action=" + action, $.withAuth(payload));
+      if (String(resp.code) === "2") {
+        $.clearAuth();
+        showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
+        location.replace("/login.html");
+        return;
+      }
+      if (String(resp.code) === "0") {
+        loadAddresses();
+        showMsg(mode === "edit" ? "编辑成功" : "新增成功", { autoCloseMs: 3000 });
+      } else {
+        showMsg((resp && resp.msg) || (mode === "edit" ? "编辑失败" : "新增失败"), { autoCloseMs: 3000 });
+      }
+    } finally {
+      setAddressSubmitting(false);
+    }
+  }
+
   function ensureSubmitProgressModal() {
     var modalId = "picaiSubmitProgressModal";
     var modal = document.getElementById(modalId);
@@ -278,11 +561,13 @@
     item.style.margin = "0";
 
     var nameEl = item.querySelector("span[class^='text_17']") || item.querySelector("span");
-    var delEl = item.querySelector("span[class^='text_18']");
+    var editEl = item.querySelector("[data-role='addr-edit']");
+    var delEl = item.querySelector("[data-role='addr-delete']") || item.querySelector("span[class^='text_18']");
     var phoneEl = item.querySelector("span[class^='text_19']");
     var addrEl = item.querySelector("span[class^='text_20']");
 
     if (nameEl) nameEl.textContent = label;
+    if (editEl) editEl.style.display = "none";
     if (delEl) delEl.style.display = "none";
     if (phoneEl) phoneEl.style.display = "none";
     if (addrEl) addrEl.style.display = "none";
@@ -333,7 +618,8 @@
     cardBlock.style.textAlign = "left";
 
     var nameEl = card.querySelector("span.text_13") || card.querySelector("span[class^='text_13']");
-    var delEl = card.querySelector("span.text_14") || card.querySelector("span[class^='text_14']");
+    var editEl = card.querySelector("[data-role='addr-edit']");
+    var delEl = card.querySelector("[data-role='addr-delete']") || card.querySelector("span.text_14") || card.querySelector("span[class^='text_14']");
     var phoneEl = card.querySelector("span.text_15") || card.querySelector("span[class^='text_15']");
     var addrEl = card.querySelector("span.text_16") || card.querySelector("span[class^='text_16']");
 
@@ -360,6 +646,16 @@
         } else {
           alert((resp && resp.msg) || "删除失败");
         }
+      };
+    }
+
+    if (editEl) {
+      editEl.style.display = a && a.address_id ? "" : "none";
+      editEl.style.cursor = "pointer";
+      editEl.onclick = function (e) {
+        e.stopPropagation();
+        if (!a || !a.address_id) return;
+        upsertAddress("edit", a);
       };
     }
   }
@@ -391,7 +687,7 @@
     // Fallback if prototype nodes are missing for some reason.
     if (!actions.add) {
       var addItem = makeSpecialAddressItem("新增地址", function () {
-        promptAddAddress();
+        upsertAddress("add", {});
       });
       if (addItem) list.appendChild(addItem);
     }
@@ -419,7 +715,26 @@
       item.style.margin = "0";
 
       var nameEl = item.querySelector("span[class^='text_17']") || item.querySelector("span");
-      var delEl = item.querySelector("span[class^='text_18']");
+      var editEl = item.querySelector("[data-role='addr-edit']");
+      var delEl = item.querySelector("[data-role='addr-delete']") || item.querySelector("span[class^='text_18']");
+      if (delEl && !delEl.getAttribute("data-role")) delEl.setAttribute("data-role", "addr-delete");
+      if (!editEl) {
+        editEl = document.createElement("span");
+        editEl.className = "addr-edit-btn";
+        editEl.textContent = "编辑";
+        editEl.setAttribute("data-role", "addr-edit");
+        if (delEl) {
+          if (delEl.parentNode && delEl.parentNode.classList && delEl.parentNode.classList.contains("addr-item-actions")) {
+            delEl.parentNode.insertBefore(editEl, delEl);
+          } else {
+            var actionWrap = document.createElement("div");
+            actionWrap.className = "addr-item-actions flex-row";
+            delEl.parentNode.insertBefore(actionWrap, delEl);
+            actionWrap.appendChild(editEl);
+            actionWrap.appendChild(delEl);
+          }
+        }
+      }
       var phoneEl = item.querySelector("span[class^='text_19']");
       var addrEl = item.querySelector("span[class^='text_20']");
 
@@ -443,11 +758,24 @@
       }
 
       item.addEventListener("click", function (e) {
-        if (e.target === delEl) return;
+        if (e.target === delEl || e.target === editEl) return;
         select();
       });
 
       if (!selectedAddressId && idx === 0) select();
+
+      if (editEl) {
+        if (!a.address_id) {
+          editEl.style.display = "none";
+        } else {
+          editEl.style.display = "";
+          editEl.style.cursor = "pointer";
+          editEl.addEventListener("click", function (e) {
+            e.stopPropagation();
+            upsertAddress("edit", a);
+          });
+        }
+      }
 
       if (delEl) {
         if (!a.address_id) {
@@ -845,49 +1173,8 @@
     if (!btn) return;
     btn.style.cursor = "pointer";
     btn.addEventListener("click", function () {
-      promptAddAddress();
+      upsertAddress("add", {});
     });
-  }
-
-  async function promptAddAddress() {
-    var name = prompt("收件人姓名", "");
-    if (name === null) return;
-    var mobile = prompt("手机号（手机/电话二选一）", "");
-    if (mobile === null) return;
-    var countryCode = prompt("国家三字码（如：MEX）", "MEX");
-    if (countryCode === null) return;
-    var prov = prompt("州/省", "");
-    if (prov === null) return;
-    var city = prompt("城市", "");
-    if (city === null) return;
-    var area = prompt("区域", "");
-    if (area === null) return;
-    var address = prompt("详细地址", "");
-    if (address === null) return;
-    var postCode = prompt("邮编", "");
-    if (postCode === null) return;
-
-    var resp = await $.apiPost(
-      "/api/wholesales/user.php?action=receiver_add",
-      $.withAuth({
-        name: name,
-        company: "",
-        postCode: postCode,
-        mailBox: "",
-        mobile: mobile,
-        phone: mobile,
-        countryCode: countryCode,
-        prov: prov,
-        city: city,
-        area: area,
-        address: address,
-      })
-    );
-    if (String(resp.code) === "0") {
-      loadAddresses();
-    } else {
-      alert((resp && resp.msg) || "新增失败");
-    }
   }
 
   wireSubmit();
