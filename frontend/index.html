@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>批采系统</title>
+  </head>
+  <body>
+    <script>
+      (function () {
+        try {
+          var user = localStorage.getItem("picai_user");
+          var token = localStorage.getItem("picai_token");
+          if (user && token) {
+            location.replace("./yuanxing/goods_list/index.html");
+          } else {
+            location.replace("./login.html");
+          }
+        } catch (e) {
+          location.replace("./login.html");
+        }
+      })();
+    </script>
+  </body>
+</html>
