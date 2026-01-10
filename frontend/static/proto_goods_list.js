@@ -13,6 +13,7 @@
 
   // Move routes into the UI: 订单列表 in left menu; 购物车 on the top-right cart icon.
   makeNavClick(document.querySelector(".group_37"), "/yuanxing/orders_list/index.html");
+  makeNavClick(document.querySelector("[data-nav='address_manage']"), "/yuanxing/lanhu_dizhiguanli/index.html");
   makeNavClick(document.querySelector(".section_3"), "/yuanxing/cart/index.html");
 
   // Avatar-side settings icon -> logout dropdown

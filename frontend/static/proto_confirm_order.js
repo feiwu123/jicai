@@ -18,6 +18,7 @@
   }
 
   makeNavClick(document.querySelector(".box_14"), "/yuanxing/orders_list/index.html");
+  makeNavClick(document.querySelector("[data-nav='address_manage']"), "/yuanxing/lanhu_dizhiguanli/index.html");
   makeNavClick(document.querySelector(".block_3"), "/yuanxing/goods_list/index.html");
   makeNavClick(document.querySelector(".section_3"), "/yuanxing/cart/index.html");
 
@@ -289,7 +290,10 @@
   }
 
   async function upsertAddress(mode, existingAddress) {
-    var values = await openAddressModal({ mode: mode, initial: existingAddress || {} });
+    var openFn = ($.addressModal && $.addressModal.open) || openAddressModal;
+    var setSubmittingFn = ($.addressModal && $.addressModal.setSubmitting) || setAddressSubmitting;
+
+    var values = await openFn({ mode: mode, initial: existingAddress || {} });
     if (!values) return;
 
     var action = mode === "edit" ? "receiver_edit" : "receiver_add";
@@ -311,7 +315,7 @@
       payload.address_id = Number(existingAddress.address_id);
     }
 
-    setAddressSubmitting(true);
+    setSubmittingFn(true);
     try {
       var resp = await $.apiPost("/api/wholesales/users.php?action=" + action, $.withAuth(payload));
       if (String(resp.code) === "2") {
@@ -327,7 +331,7 @@
         showMsg((resp && resp.msg) || (mode === "edit" ? "编辑失败" : "新增失败"), { autoCloseMs: 3000 });
       }
     } finally {
-      setAddressSubmitting(false);
+      setSubmittingFn(false);
     }
   }
 

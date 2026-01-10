@@ -550,6 +550,33 @@
     } catch (e) {}
   }
 
+  function normalizeLeftMenuForAddressNav() {
+    var addrBtn = null;
+    try {
+      addrBtn = document.querySelector("[data-nav='address_manage']");
+    } catch (e) {
+      addrBtn = null;
+    }
+    if (!addrBtn) return;
+
+    // Some prototype pages place the "订单列表" menu item as the last item and use an exaggerated bottom margin
+    // to fill the sidebar. Once we add another item below it, that margin pushes the new item out of view.
+    var candidates = [".group_37", ".block_15", ".box_14", ".block_4", ".block_5", ".group_3"];
+    candidates.forEach(function (sel) {
+      try {
+        var el = document.querySelector(sel);
+        if (!el) return;
+        var mb = 0;
+        try {
+          mb = parseFloat((window.getComputedStyle(el).marginBottom || "0").replace("px", "")) || 0;
+        } catch (e2) {
+          mb = 0;
+        }
+        if (mb >= 100) el.style.marginBottom = "0";
+      } catch (e) {}
+    });
+  }
+
   window.picai = {
     qs: qs,
     qsa: qsa,
@@ -578,7 +605,22 @@
         "html,body{max-width:100%;overflow-x:hidden} .page{max-width:100%;overflow-x:hidden;width:100%!important}";
       document.head.appendChild(style);
     })();
+
+    // Shared styling for extra left-menu buttons we add on prototype pages.
+    (function ensureMenuStyle() {
+      if (document.getElementById("picaiMenuStyle")) return;
+      var style = document.createElement("style");
+      style.id = "picaiMenuStyle";
+      style.textContent =
+        ".picai-left-menu-btn{width:223px;height:38px;margin:12px 0 0 16px;border-radius:10px;display:flex;align-items:center;gap:10px;padding:0 14px;box-sizing:border-box;color:rgba(84,98,116,1);cursor:pointer;user-select:none}" +
+        ".picai-left-menu-btn:hover{background:rgba(0,0,0,0.04)}" +
+        ".picai-left-menu-btn img{width:18px;height:18px;flex:0 0 auto}" +
+        ".picai-left-menu-btn span{font-size:14px;line-height:14px;white-space:nowrap;font-family:PingFang HK-Semibold, PingFang SC-Semibold, PingFang HK, PingFang SC, system-ui, -apple-system, Segoe UI, Roboto, Arial, 'Microsoft YaHei', sans-serif;font-weight:600}" +
+        ".picai-left-menu-btn.active{background:#3b83f6;color:#fff}";
+      document.head.appendChild(style);
+    })();
     renderUserName();
     alignHeaderRightIcons();
+    normalizeLeftMenuForAddressNav();
   } catch (e) {}
 })();

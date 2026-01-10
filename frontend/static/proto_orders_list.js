@@ -12,6 +12,7 @@
   }
 
   makeNavClick(document.querySelector(".block_7"), "/yuanxing/goods_list/index.html");
+  makeNavClick(document.querySelector("[data-nav='address_manage']"), "/yuanxing/lanhu_dizhiguanli/index.html");
   makeNavClick(document.querySelector(".section_3"), "/yuanxing/cart/index.html");
 
   // Search box only exists in goods list.

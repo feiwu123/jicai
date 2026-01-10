@@ -22,6 +22,7 @@
   }
 
   makeNavClick(document.querySelector(".block_15"), "/yuanxing/orders_list/index.html");
+  makeNavClick(document.querySelector("[data-nav='address_manage']"), "/yuanxing/lanhu_dizhiguanli/index.html");
   makeNavClick(document.querySelector(".box_5"), "/yuanxing/goods_list/index.html");
   makeNavClick(document.querySelector(".group_4"), "/yuanxing/cart/index.html");
 
@@ -186,15 +187,33 @@
     };
   }
 
-  function setSummary(summary) {
+  function setSummary(summary, opts) {
+    opts = opts || {};
+    var placeholder = opts.placeholder || "暂无";
+    var loading = opts.loading === true;
+
+    function hasValue(v) {
+      return v !== undefined && v !== null && String(v) !== "";
+    }
+
     var goodsAmountEl = document.querySelector("span.text_12");
-    if (goodsAmountEl) goodsAmountEl.textContent = summary && summary.goods_amount != null ? String(summary.goods_amount) : "0";
+    if (goodsAmountEl) {
+      goodsAmountEl.textContent =
+        !loading && summary && hasValue(summary.goods_amount) ? String(summary.goods_amount) : String(placeholder);
+    }
     var goodsNumEl = document.querySelector("span.text_14");
-    if (goodsNumEl) goodsNumEl.textContent = summary && summary.goods_num != null ? String(summary.goods_num) : "0";
+    if (goodsNumEl) {
+      goodsNumEl.textContent = !loading && summary && hasValue(summary.goods_num) ? String(summary.goods_num) : String(placeholder);
+    }
     var skuEl = document.querySelector("span.text_16");
-    if (skuEl) skuEl.textContent = summary && summary.sku_num != null ? String(summary.sku_num) : "0";
+    if (skuEl) {
+      skuEl.textContent = !loading && summary && hasValue(summary.sku_num) ? String(summary.sku_num) : String(placeholder);
+    }
     var totalEl = document.querySelector("span.text_18");
-    if (totalEl) totalEl.textContent = summary && summary.goods_amount != null ? String(summary.goods_amount) : "0";
+    if (totalEl) {
+      totalEl.textContent =
+        !loading && summary && hasValue(summary.goods_amount) ? String(summary.goods_amount) : String(placeholder);
+    }
   }
 
   function buildQtyInput(initial, onChange) {
@@ -471,6 +490,8 @@
 
   async function load() {
     removeStaticSectionsOutsideGroup12();
+    // Summary (right panel) shows "暂无" until cart data arrives.
+    setSummary(null, { loading: true, placeholder: "暂无" });
 
     var area = findCartArea();
     var tpl = parseTemplates(area);
@@ -499,6 +520,7 @@
     }
     if (String(resp.code) !== "0") {
       showMsg((resp && resp.msg) || "加载失败");
+      setSummary(null, { loading: true, placeholder: "暂无" });
       return;
     }
 

@@ -13,6 +13,7 @@
 
   makeNavClick(document.querySelector(".box_11"), "/yuanxing/goods_list/index.html");
   makeNavClick(document.querySelector(".block_5"), "/yuanxing/orders_list/index.html");
+  makeNavClick(document.querySelector("[data-nav='address_manage']"), "/yuanxing/lanhu_dizhiguanli/index.html");
   makeNavClick(document.querySelector(".section_2"), "/yuanxing/cart/index.html");
 
   // Avatar-side settings icon -> logout dropdown
