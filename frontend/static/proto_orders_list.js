@@ -3,6 +3,11 @@
   var auth = $.requireAuth();
   if (!auth) return;
 
+  function showMsg(msg, opts) {
+    if ($ && $.showModalMessage) return $.showModalMessage(msg, opts || {});
+    alert(msg);
+  }
+
   function makeNavClick(el, href) {
     if (!el) return;
     el.style.cursor = "pointer";
@@ -363,9 +368,11 @@
 
     var cancel = node.querySelector("span.text_28");
     if (cancel) {
-      cancel.style.opacity = "0.4";
-      cancel.style.cursor = "not-allowed";
-      cancel.title = "原型按钮（接口未提供）";
+      var reviewStatus = String(order && order.review_status);
+      cancel.textContent = reviewStatus === "1" ? "已审核" : "未审核";
+      cancel.style.opacity = "1";
+      cancel.style.cursor = "default";
+      cancel.title = "";
     }
 
     var track = node.querySelector("span.text_29");
@@ -375,6 +382,74 @@
         showLogisticsModal(order || {}, g || {});
       });
     }
+
+    async function payOrder() {
+      if (!order || !order.order_id) {
+        showMsg("缺少订单ID");
+        return;
+      }
+      var original = payBtn ? payBtn.textContent : "";
+      if (payBtn) {
+        payBtn.textContent = "支付中…";
+        payBtn.style.pointerEvents = "none";
+        payBtn.style.opacity = "0.75";
+      }
+      try {
+        var resp = await $.apiPost(
+          "/api/wholesales/orders.php?action=balance_payment",
+          $.withAuth({ order_id: String(order.order_id) })
+        );
+        if (String(resp.code) === "2") {
+          $.clearAuth();
+          showMsg("登录已失效，请重新登录", { autoCloseMs: 1200 });
+          location.replace("/login.html");
+          return;
+        }
+        if (String(resp.code) === "0") {
+          showMsg((resp && resp.msg) || "支付成功", { autoCloseMs: 3000 });
+        } else {
+          showMsg((resp && resp.msg) || "支付失败", { autoCloseMs: 3000 });
+        }
+      } finally {
+        if (payBtn) {
+          payBtn.textContent = original || "立即支付";
+          payBtn.style.pointerEvents = "";
+          payBtn.style.opacity = "";
+        }
+      }
+    }
+
+    // Add "立即支付" when order_status==1 && pay_status==0 && review_status==1
+    var shouldPay =
+      String(order && order.order_status) === "1" &&
+      String(order && order.pay_status) === "0" &&
+      String(order && order.review_status) === "1";
+    var payBtn = null;
+    if (shouldPay) {
+      payBtn = document.createElement("span");
+      payBtn.className = "pay-now-btn";
+      payBtn.textContent = "立即支付";
+      payBtn.style.display = "block";
+      payBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        payOrder();
+      });
+    }
+
+    // Place action buttons into a 2x2 grid container at the right side.
+    var actionsWrap = document.createElement("div");
+    actionsWrap.className = "order-actions";
+    if (cancel) {
+      node.removeChild(cancel);
+      actionsWrap.appendChild(cancel);
+    }
+    if (track) {
+      node.removeChild(track);
+      actionsWrap.appendChild(track);
+    }
+    if (payBtn) actionsWrap.appendChild(payBtn);
+    // If only one action exists, keep grid structure; no placeholder needed.
+    node.appendChild(actionsWrap);
   }
 
   function wireSearch(reload) {

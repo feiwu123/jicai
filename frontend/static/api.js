@@ -577,6 +577,84 @@
     });
   }
 
+  // Shared cart SKU badge helpers
+  function ensureCartBadgeStyle(el) {
+    if (!el) return;
+    if (!el.style.position) el.style.position = "absolute";
+    if (!el.style.right) el.style.right = "-8px";
+    if (!el.style.top) el.style.top = "-6px";
+    if (!el.style.minWidth) el.style.minWidth = "18px";
+    if (!el.style.height) el.style.height = "18px";
+    if (!el.style.padding) el.style.padding = "0 5px";
+    if (!el.style.backgroundColor) el.style.backgroundColor = "rgba(232, 69, 122, 1)";
+    if (!el.style.border) el.style.border = "1px solid rgba(255, 255, 255, 0.9)";
+    if (!el.style.borderRadius) el.style.borderRadius = "999px";
+    if (!el.style.color) el.style.color = "#fff";
+    if (!el.style.fontSize) el.style.fontSize = "12px";
+    if (!el.style.fontFamily)
+      el.style.fontFamily =
+        "PingFang HK-Semibold, PingFang SC-Semibold, PingFang HK, PingFang SC, system-ui, -apple-system, Segoe UI, Roboto, Arial, 'Microsoft YaHei', sans-serif";
+    if (!el.style.fontWeight) el.style.fontWeight = "700";
+    if (!el.style.lineHeight) el.style.lineHeight = "16px";
+    if (!el.style.textAlign) el.style.textAlign = "center";
+    if (!el.style.boxShadow) el.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.15)";
+    el.style.pointerEvents = "none";
+  }
+
+  function ensureCartBadge() {
+    var badge = document.getElementById("picaiCartSkuCount");
+    if (badge) return badge;
+    badge = document.createElement("div");
+    badge.id = "picaiCartSkuCount";
+    badge.className = "cart-sku-count";
+    badge.textContent = "--";
+    ensureCartBadgeStyle(badge);
+    var icon =
+      document.querySelector(".header-cart") ||
+      document.querySelector(".section_3") ||
+      document.querySelector(".box_1 .group_4") ||
+      document.querySelector(".group_4");
+    var header = document.querySelector(".box_1") || document.querySelector(".page");
+    var parent = icon || header || document.body;
+    if (parent && !parent.style.position) parent.style.position = "relative";
+    if (parent) parent.appendChild(badge);
+    return badge;
+  }
+
+  function setCartBadge(val) {
+    var badge = ensureCartBadge();
+    var text = val == null || val === "" ? "--" : String(val);
+    badge.textContent = text;
+  }
+
+  async function refreshCartBadge() {
+    var a = getAuth();
+    if (!a.user || !a.token) {
+      setCartBadge("--");
+      return;
+    }
+    setCartBadge("...");
+    var resp = await apiPost("/api/wholesales/goods.php?action=get_cart_num", withAuth({}));
+    if (String(resp.code) === "2") {
+      clearAuth();
+      showModalMessage("登录已失效，请重新登录", { autoCloseMs: 900 });
+      location.replace("/login.html");
+      return;
+    }
+    var codeNum = Number(resp.code);
+    if (!isNaN(codeNum) && codeNum > 1) {
+      showModalMessage((resp && resp.msg) || "获取购物车数量失败", { autoCloseMs: 3000 });
+      setCartBadge("--");
+      return;
+    }
+    if (String(resp.code) === "0") {
+      var num = resp.data && (resp.data.num || resp.data.total || resp.data.count);
+      setCartBadge(num);
+    } else {
+      setCartBadge("--");
+    }
+  }
+
   window.picai = {
     qs: qs,
     qsa: qsa,
@@ -593,6 +671,8 @@
     renderUserName: renderUserName,
     alignHeaderRightIcons: alignHeaderRightIcons,
     statusText: statusText,
+    ensureCartBadge: ensureCartBadge,
+    refreshCartBadge: refreshCartBadge,
   };
 
   try {
@@ -622,5 +702,10 @@
     renderUserName();
     alignHeaderRightIcons();
     normalizeLeftMenuForAddressNav();
+    // Auto-mount cart badge on any page that has the cart icon.
+    if (document.querySelector(".group_4")) {
+      ensureCartBadge();
+      refreshCartBadge();
+    }
   } catch (e) {}
 })();

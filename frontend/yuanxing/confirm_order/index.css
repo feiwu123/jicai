@@ -840,7 +840,7 @@
 }
 
 .image-text_16 {
-  width: 132px;
+  width: 1163px;
   height: 24px;
   margin: 11px 0 0 24px;
 }
@@ -862,6 +862,25 @@
   white-space: nowrap;
   line-height: 14px;
   margin-top: 6px;
+}
+
+.shop-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shop-name-wrap .text-group_2,
+.shop-name-wrap .text-group_5 {
+  margin-top: 0;
+}
+
+.shop-freight {
+  color: rgba(84, 98, 116, 1);
+  font-size: 13px;
+  font-family: PingFang HK-Semibold;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .box_6 {
@@ -1149,7 +1168,7 @@
 }
 
 .image-text_19 {
-  width: 132px;
+  width: 1163px;
   height: 24px;
   margin: 11px 0 0 24px;
 }

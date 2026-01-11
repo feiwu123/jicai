@@ -352,7 +352,53 @@
         name.style.height = "16px";
         name.style.lineHeight = "16px";
       }
-      if (sku) sku.textContent = "SKU:" + (goods.goods_sn || "");
+      if (sku) {
+        var skuText = String(goods.goods_sn || "");
+        sku.textContent = "SKU:" + skuText;
+        sku.classList.add("sku-text");
+        if (!sku.querySelector(".sku-copy-btn")) {
+          var copyBtn = document.createElement("span");
+          copyBtn.className = "sku-copy-btn";
+          copyBtn.title = "复制SKU";
+          copyBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            var val = skuText || "";
+            if (!val) {
+              showMsg("SKU为空，无法复制", { autoCloseMs: 1500 });
+              return;
+            }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(val).then(
+                function () {
+                  showMsg("SKU已复制", { autoCloseMs: 1200 });
+                },
+                function () {
+                  fallbackCopy(val);
+                }
+              );
+            } else {
+              fallbackCopy(val);
+            }
+          });
+          sku.appendChild(copyBtn);
+        }
+      }
+
+      function fallbackCopy(text) {
+        try {
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          showMsg("SKU已复制", { autoCloseMs: 1200 });
+        } catch (e) {
+          showMsg("复制失败", { autoCloseMs: 1500 });
+        }
+      }
 
       var cat = row.querySelector("span.text_23");
       if (cat) cat.textContent = goods.cat_name || "";

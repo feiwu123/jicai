@@ -13,6 +13,49 @@
     alert(msg);
   }
 
+  function ensureCartSkuBadge() {
+    var badge = document.getElementById("picaiCartSkuCount");
+    if (badge) return badge;
+    badge = document.createElement("div");
+    badge.id = "picaiCartSkuCount";
+    badge.className = "cart-sku-count";
+    badge.textContent = "--";
+    var icon = document.querySelector(".group_4");
+    var header = document.querySelector(".box_1") || document.querySelector(".page");
+    var parent = icon || header;
+    if (parent) parent.appendChild(badge);
+    return badge;
+  }
+
+  function setCartSkuBadge(val) {
+    var badge = ensureCartSkuBadge();
+    var text = val == null || val === "" ? "--" : String(val);
+    badge.textContent = text;
+  }
+
+  async function loadCartSkuCount() {
+    setCartSkuBadge("...");
+    var resp = await $.apiPost("/api/wholesales/goods.php?action=get_cart_num", $.withAuth({}));
+    if (String(resp.code) === "2") {
+      $.clearAuth();
+      showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
+      location.replace("/login.html");
+      return;
+    }
+    var codeNum = Number(resp.code);
+    if (!isNaN(codeNum) && codeNum > 1) {
+      showMsg((resp && resp.msg) || "获取购物车数量失败", { autoCloseMs: 3000 });
+      setCartSkuBadge("--");
+      return;
+    }
+    if (String(resp.code) === "0") {
+      var num = resp.data && (resp.data.num || resp.data.total || resp.data.count);
+      setCartSkuBadge(num);
+    } else {
+      setCartSkuBadge("--");
+    }
+  }
+
   function makeNavClick(el, href) {
     if (!el) return;
     el.style.cursor = "pointer";
@@ -595,6 +638,7 @@
     wireSelectAll();
     wireSubmit();
     syncSelectionUI();
+    loadCartSkuCount();
   }
 
   load();

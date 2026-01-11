@@ -8,6 +8,9 @@
   var cachedAddressActions = { add: null, topm: null };
   var lastCartGroups = [];
   var isSubmitting = false;
+  var selectedAddress = null;
+  var freightCache = {};
+  var freightPending = {};
 
   function makeNavClick(el, href) {
     if (!el) return;
@@ -616,6 +619,7 @@
   function fillSelectedAddressCard(a) {
     var card = findSelectedAddressCard();
     if (!card) return;
+    selectedAddress = a || null;
 
     card.style.textAlign = "left";
     var cardBlock = card.querySelector(".block_5") || card;
@@ -754,11 +758,14 @@
 
       function select() {
         selectedAddressId = String(a.address_id || "");
+        selectedAddress = a || null;
         window.picai.qsa("[data-address-id]").forEach(function (el) {
           el.style.outline = "none";
           el.style.borderRadius = "10px";
         });
         item.style.outline = "2px solid rgba(106,124,255,0.55)";
+        fillSelectedAddressCard(a);
+        refreshFreightForGroups(lastCartGroups);
       }
 
       item.addEventListener("click", function (e) {
@@ -810,7 +817,7 @@
       var selected = addrs.find(function (x) {
         return String(x && x.address_id) === String(selectedAddressId);
       });
-      if (selected) fillSelectedAddressCard(selected);
+      if (selected) selectedAddress = selected;
     }
   }
 
@@ -934,10 +941,134 @@
     return has;
   }
 
+  function getShopId(shop) {
+    if (!shop) return "";
+    return String(shop.shop_id || shop.user_id || shop.id || shop.shopId || "");
+  }
+
+  function getRecIds(items) {
+    return (items || [])
+      .map(function (it) {
+        return it && (it.rec_id || it.recId);
+      })
+      .filter(function (x) {
+        return x != null && String(x).trim() !== "";
+      })
+      .map(function (x) {
+        return String(x);
+      });
+  }
+
+  function getSelectedZip() {
+    if (!selectedAddress) return "";
+    return String(
+      selectedAddress.postCode ||
+        selectedAddress.post_code ||
+        selectedAddress.zip ||
+        selectedAddress.zipcode ||
+        selectedAddress.destinationZipCode ||
+        ""
+    ).trim();
+  }
+
+  function ensureFreightEl(node) {
+    if (!node) return null;
+    var el = node.querySelector(".shop-freight");
+    if (el) return el;
+    el = document.createElement("span");
+    el.className = "shop-freight";
+    node.appendChild(el);
+    return el;
+  }
+
+  function formatFreightValue(value) {
+    if (value == null) return "--";
+    var str = String(value).trim();
+    return str ? str : "--";
+  }
+
+  function setShopFreight(node, valueText) {
+    var el = ensureFreightEl(node);
+    if (!el) return;
+    el.textContent = "运费：" + formatFreightValue(valueText);
+  }
+
+  async function fetchFreight(shopId, recIds, zip) {
+    if (!shopId || !recIds || !recIds.length || !zip) return null;
+    var key = shopId + "|" + recIds.join(",") + "|" + zip;
+    if (freightCache.hasOwnProperty(key)) return freightCache[key];
+    if (freightPending[key]) return null;
+    freightPending[key] = true;
+    try {
+      var resp = await $.apiPost(
+        "/api/wholesales/goods.php?action=getComCost",
+        $.withAuth({
+          cart_value: recIds.join(","),
+          shop_id: String(shopId),
+          destinationZipCode: String(zip),
+        })
+      );
+      if (String(resp.code) === "2") {
+        $.clearAuth();
+        showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
+        location.replace("/login.html");
+        return null;
+      }
+      var codeNum = Number(resp.code);
+      if (!isNaN(codeNum) && codeNum > 1) {
+        showMsg((resp && resp.msg) || "运费计算失败", { autoCloseMs: 3000 });
+        return null;
+      }
+      if (String(resp.code) === "0" && resp.data) {
+        var totalPrice = resp.data.totalPrice || resp.data.total_price || resp.data.price || resp.data.amount;
+        freightCache[key] = totalPrice;
+        return totalPrice;
+      }
+      return null;
+    } finally {
+      delete freightPending[key];
+    }
+  }
+
   function fillShopHeader(node, shop) {
     if (!node) return;
     var nameEl = node.querySelector("span.text-group_2") || node.querySelector("span.text-group_5") || node.querySelector("span");
     if (nameEl) nameEl.textContent = (shop && shop.shop_name) || "店铺";
+    ensureFreightEl(node);
+  }
+
+  function refreshFreightForHeader(node, shopId, recIds) {
+    if (!node) return;
+    if (!shopId || !recIds || !recIds.length) {
+      setShopFreight(node, "--");
+      return;
+    }
+    var zip = getSelectedZip();
+    if (!zip) {
+      setShopFreight(node, "请先选择地址");
+      return;
+    }
+    setShopFreight(node, "计算中...");
+    fetchFreight(shopId, recIds, zip).then(function (price) {
+      if (!node || !node.parentNode) return;
+      if (price == null) {
+        setShopFreight(node, "--");
+      } else {
+        setShopFreight(node, price);
+      }
+    });
+  }
+
+  function refreshFreightForGroups(groups) {
+    var area = findConfirmArea();
+    if (!area) return;
+    var headers = area.querySelectorAll("[data-role='shop-header']");
+    if (!headers || !headers.length) return;
+    headers.forEach(function (header) {
+      var shopId = header.getAttribute("data-shop-id") || "";
+      var recIds = (header.getAttribute("data-rec-ids") || "").split(",").filter(Boolean);
+      refreshFreightForHeader(header, shopId, recIds);
+    });
   }
 
   function fillItemRow(node, it) {
@@ -993,11 +1124,18 @@
     (groups || []).forEach(function (g) {
       var shop = (g && g.shop) || {};
       var shopHeader = tpl.shopHeader.cloneNode(true);
+      shopHeader.setAttribute("data-role", "shop-header");
+      var items = (g && g.lists) || [];
+      if (items && !Array.isArray(items)) items = [items];
+      var recIds = getRecIds(items);
+      var shopId = getShopId(shop);
+      if (shopId) shopHeader.setAttribute("data-shop-id", String(shopId));
+      if (recIds.length) shopHeader.setAttribute("data-rec-ids", recIds.join(","));
       fillShopHeader(shopHeader, shop);
       area.appendChild(shopHeader);
 
-      var items = (g && g.lists) || [];
-      if (items && !Array.isArray(items)) items = [items];
+      refreshFreightForHeader(shopHeader, shopId, recIds);
+
       items.forEach(function (it) {
         var row = tpl.itemRow.cloneNode(true);
         fillItemRow(row, it || {});

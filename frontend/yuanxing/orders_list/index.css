@@ -678,6 +678,34 @@
   margin: 6px 0 0 32px;
 }
 
+.pay-now-btn {
+  display: block;
+  width: 56px;
+  height: 12px;
+  overflow-wrap: break-word;
+  color: rgba(59, 131, 246, 1);
+  font-size: 14px;
+  font-family: PingFang HK-Regular;
+  font-weight: 400;
+  text-align: right;
+  white-space: nowrap;
+  line-height: 14px;
+  margin: 6px 0 0 32px;
+  cursor: pointer;
+}
+
+.order-actions {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  grid-auto-rows: auto;
+  column-gap: 16px;
+  row-gap: 6px;
+  margin-left: auto;
+  margin-right: 0;
+  align-items: center;
+  justify-items: end;
+}
+
 .box_8 {
   width: 1553px;
   height: 104px;

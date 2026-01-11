@@ -10,6 +10,7 @@
   background-color: rgba(255, 255, 255, 1);
   width: 1920px;
   height: 63px;
+  position: relative;
 }
 
 .group_1 {
@@ -85,6 +86,27 @@
   background-size: 100% 100%;
   width: 19px;
   margin: 22px 34px 0 24px;
+  position: relative;
+}
+
+.cart-sku-count {
+  position: absolute;
+  right: -8px;
+  top: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background-color: rgba(232, 69, 122, 1);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  font-family: PingFang HK-Semibold;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
 }
 
 .group_5 {
