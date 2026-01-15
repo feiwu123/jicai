@@ -9,6 +9,7 @@ import traceback
 import urllib.error
 import urllib.parse
 import urllib.request
+import os
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -18,7 +19,7 @@ _HERE = Path(__file__).resolve().parent
 _ROOT = _HERE.parent
 _FRONTEND_DIR = _ROOT / "frontend"
 _DEFAULT_INDEX = _FRONTEND_DIR / "index.html"
-_API_ORIGIN = "https://topm.tech"
+_API_ORIGIN = os.getenv("PICAI_API_ORIGIN") or os.getenv("TOPM_BASE") or "https://topm.tech"
 
 
 def _safe_join(root: Path, url_path: str) -> Path | None:
