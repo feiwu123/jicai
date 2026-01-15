@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>订单详情</title>
+    <script src="./flexible.js"></script>
+    <link rel="stylesheet" type="text/css" href="./common.css" />
+    <link rel="stylesheet" type="text/css" href="./index.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      .picai-order-detail-content.page {
+        width: 1601px;
+        height: auto;
+        overflow: visible;
+        background: transparent;
+      }
+      .picai-order-detail-content .group_4 {
+        margin: 0;
+      }
+      .picai-order-detail-content .list_1 {
+        margin: 17px 0 0 0;
+      }
+      .picai-order-detail-content .group_5 {
+        margin: 16px 0 0 0;
+      }
+      .picai-order-detail-content .group_8 {
+        position: relative;
+        margin: 16px 0 0 0;
+      }
+
+      /* Goods list: add 单价列 like prototype (no absolute-position elements) */
+      .picai-order-detail-content .text-wrapper_13,
+      .picai-order-detail-content .text-wrapper_16 {
+        margin-left: 0 !important;
+      }
+      .picai-order-detail-content .text-wrapper_unit {
+        background-color: rgba(250, 250, 250, 1);
+        height: 46px;
+        border: 1px solid rgba(229, 230, 235, 1);
+        width: 378px;
+      }
+      .picai-order-detail-content .text_unit {
+        width: 33px;
+        height: 17px;
+        overflow-wrap: break-word;
+        color: rgba(51, 51, 51, 1);
+        font-size: 16px;
+        font-family: PingFang SC-Medium;
+        font-weight: 500;
+        text-align: left;
+        white-space: nowrap;
+        line-height: 16px;
+        margin: 13px 0 0 12px;
+      }
+      .picai-order-detail-content .text-wrapper_unit_price {
+        height: 46px;
+        border: 1px solid rgba(229, 230, 235, 1);
+        width: 378px;
+      }
+      .picai-order-detail-content .text_unit_price {
+        width: auto;
+        height: 17px;
+        overflow-wrap: break-word;
+        color: rgba(51, 51, 51, 1);
+        font-size: 15px;
+        font-family: PingFang SC-Regular;
+        font-weight: 400;
+        text-align: left;
+        white-space: nowrap;
+        line-height: 15px;
+        margin: 14px 0 0 12px;
+      }
+
+      .picai-order-detail-content .text_38 {
+        width: auto;
+        max-width: 390px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Order info: avoid order_sn / copy overlap; keep layout like prototype */
+      .picai-order-detail-content .text-wrapper_8-0 {
+        width: 1553px;
+        height: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .picai-order-detail-content .text_19-0 {
+        width: auto;
+        max-width: 360px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .picai-order-detail-content .text_20-0 {
+        position: static;
+        left: auto;
+        top: auto;
+        width: auto;
+        height: auto;
+        margin-left: 2px;
+      }
+      .picai-order-detail-content .text_21-0 {
+        margin-left: auto;
+      }
+      .picai-order-detail-content .text_23-0 {
+        margin-left: 8px;
+      }
+
+      .picai-order-detail-content .text-wrapper_9-0 {
+        width: 1553px;
+        height: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 16px 0 27px 24px;
+      }
+      .picai-order-detail-content .text_26-0 {
+        margin-left: auto;
+      }
+      .picai-order-detail-content .text_27-0 {
+        width: auto;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+      }
+
+      .picai-order-detail-content .picai-status-badges {
+        justify-content: flex-start;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page flex-col picai-order-detail-content">
+      <div class="group_4 flex-col">
+        <span class="text_4">下单流程</span>
+        <div class="box_1 flex-col"></div>
+        <div class="text-wrapper_1 flex-row">
+          <span class="text_5">下单</span>
+          <span class="text_6">支付</span>
+          <span class="text_7">发货</span>
+          <span class="text_8">确认收货</span>
+        </div>
+        <div class="text-wrapper_2 flex-row">
+          <span class="text_9">2025-01-01&nbsp;10:00</span>
+          <span class="text_10">2025-01-01&nbsp;10:05</span>
+          <span class="text_11">2025-01-02&nbsp;09:30</span>
+          <span class="text_12">—</span>
+        </div>
+        <div class="text-wrapper_3 flex-col">
+          <span class="text_13">1</span>
+        </div>
+        <div class="text-wrapper_4 flex-col">
+          <span class="text_14">2</span>
+        </div>
+        <div class="text-wrapper_5 flex-col">
+          <span class="text_15">3</span>
+        </div>
+        <div class="text-wrapper_6 flex-col">
+          <span class="text_16">4</span>
+        </div>
+      </div>
+
+      <div class="list_1 flex-col">
+        <div class="list-items_1-0 flex-col">
+          <div class="text-wrapper_7-0 flex-row">
+            <span class="text_17-0">订单信息</span>
+          </div>
+          <div class="text-wrapper_8-0 flex-row">
+            <span class="text_18-0">订单号：</span>
+            <span class="text_19-0">202501010001</span>
+            <span class="text_20-0">复制</span>
+            <span class="text_21-0">下单时间：</span>
+            <span class="text_23-0">2025-01-01&nbsp;10:00</span>
+          </div>
+          <div class="text-wrapper_9-0 flex-row">
+            <span class="text_24-0">支付方式：</span>
+            <span class="text_25-0">支付宝</span>
+            <span class="text_26-0">订单状态：</span>
+            <span class="text_27-0">待确认收货</span>
+          </div>
+        </div>
+        <div class="list-items_1-1 flex-col">
+          <div class="text-wrapper_7-1 flex-row">
+            <span class="text_17-1">收件人信息</span>
+          </div>
+          <div class="text-wrapper_8-1 flex-row">
+            <span class="text_18-1">收件人：</span>
+            <span class="text_19-1">张三</span>
+            <span class="text_21-1">手机号：</span>
+            <span class="text_22-1">138****8888</span>
+          </div>
+          <div class="text-wrapper_9-1 flex-row">
+            <span class="text_24-1">收货地址：</span>
+            <span class="text_25-1">北京市朝阳区XX路XX号</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group_5 flex-col">
+        <span class="text_28">物流信息</span>
+        <div class="group_6 flex-row">
+          <div class="text-group_1 flex-col">
+            <span class="text_29">包裹&nbsp;1（顺丰速运：SF123456）</span>
+            <span class="text_30">2025-01-02&nbsp;09:30&nbsp;已揽收</span>
+            <span class="text_31">2025-01-03&nbsp;14:20&nbsp;运输中</span>
+          </div>
+        </div>
+        <div class="group_7 flex-row">
+          <div class="text-group_2 flex-col justify-between">
+            <span class="text_32">包裹&nbsp;2（中通快递：ZT987654）</span>
+            <span class="text_33">2025-01-02&nbsp;10:10&nbsp;已揽收</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group_8 flex-col">
+        <div class="text-wrapper_10 flex-row">
+          <span class="text_34">商品列表</span>
+        </div>
+        <div class="box_2 flex-row">
+          <div class="text-wrapper_11 flex-col">
+            <span class="text_35">商品</span>
+          </div>
+          <div class="text-wrapper_12 flex-col">
+            <span class="text_36">SKU</span>
+          </div>
+          <div class="text-wrapper_unit flex-col">
+            <span class="text_unit">单价</span>
+          </div>
+          <div class="text-wrapper_13 flex-col">
+            <span class="text_37">总价</span>
+          </div>
+        </div>
+        <div class="box_3 flex-row">
+          <div class="text-wrapper_14 flex-col">
+            <span class="text_38">商品B&nbsp;×2</span>
+          </div>
+          <div class="text-wrapper_15 flex-col">
+            <span class="text_39">蓝色&nbsp;/&nbsp;L</span>
+          </div>
+          <div class="text-wrapper_unit_price flex-col">
+            <span class="text_unit_price">￥100.00</span>
+          </div>
+          <div class="text-wrapper_16 flex-col">
+            <span class="text_40">￥100.00</span>
+          </div>
+        </div>
+        <div class="text-wrapper_17 flex-row">
+          <span class="text_41">商品件数：3&nbsp;件</span>
+        </div>
+        <div class="text-wrapper_18 flex-row">
+          <span class="text_42">商品总金额：￥200.00</span>
+        </div>
+        <div class="text-wrapper_19 flex-row">
+          <span class="text_43">优惠金额：-￥20.00</span>
+        </div>
+        <div class="text-wrapper_20 flex-row">
+          <span class="text_44">运费：￥10.00</span>
+        </div>
+        <div class="text-wrapper_21 flex-row">
+          <span class="text_45">实付金额：￥190.00</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/api.js"></script>
+    <script src="/static/proto_order_detail.js"></script>
+  </body>
+</html>

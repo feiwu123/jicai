@@ -38,6 +38,11 @@
     $.mountLogoutMenu(settings);
   } catch (e) {}
 
+  function safeText(v) {
+    if (v === undefined || v === null) return "";
+    return String(v);
+  }
+
   function showMsg(msg, opts) {
     if ($ && $.showModalMessage) return $.showModalMessage(msg, opts || {});
     alert(msg);
@@ -506,6 +511,140 @@
     document.body.style.overflow = "";
   }
 
+  function ensureSubmitResultModal() {
+    var modalId = "picaiSubmitResultModal";
+    var modal = document.getElementById(modalId);
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = modalId;
+    modal.className = "modal-overlay hidden";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+
+    modal.innerHTML =
+      '<div class="modal-container">' +
+      '  <div class="modal-header">' +
+      '    <div class="status-icon">✓</div>' +
+      '    <div class="modal-title">提交完成</div>' +
+      "  </div>" +
+      '  <div class="modal-content">' +
+      '    <div class="summary-grid">' +
+      '      <div class="summary-item">' +
+      '        <span class="label">店铺总数</span>' +
+      '        <span class="value" data-role="shopTotal">0</span>' +
+      "      </div>" +
+      '      <div class="summary-item">' +
+      '        <span class="label" style="color: #52c41a;">成功</span>' +
+      '        <span class="value" style="color: #52c41a;" data-role="okCount">0</span>' +
+      "      </div>" +
+      '      <div class="summary-item">' +
+      '        <span class="label" style="color: #ff4d4f;">失败</span>' +
+      '        <span class="value" style="color: #ff4d4f;" data-role="failCount">0</span>' +
+      "      </div>" +
+      "    </div>" +
+      '    <div class="order-list-title" data-role="orderTitle">已提交订单详情：</div>' +
+      '    <div data-role="orderList"></div>' +
+      "  </div>" +
+      '  <div class="modal-footer">' +
+      '    <button type="button" class="btn btn-close" data-role="close">关闭</button>' +
+      '    <button type="button" class="btn btn-primary" data-role="go">查看订单</button>' +
+      "  </div>" +
+      "</div>";
+
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) hideSubmitResultModal();
+    });
+
+    document.body.appendChild(modal);
+
+    var closeBtn = modal.querySelector("[data-role='close']");
+    if (closeBtn) closeBtn.addEventListener("click", hideSubmitResultModal);
+
+    var goBtn = modal.querySelector("[data-role='go']");
+    if (goBtn) {
+      goBtn.addEventListener("click", function () {
+        location.replace("/yuanxing/orders_list/index.html");
+      });
+    }
+
+    return modal;
+  }
+
+  function hideSubmitResultModal() {
+    var modal = document.getElementById("picaiSubmitResultModal");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    document.body.style.overflow = "";
+  }
+
+  function showSubmitResultModal(steps, results, failures) {
+    var modal = ensureSubmitResultModal();
+    var shopTotalEl = modal.querySelector("[data-role='shopTotal']");
+    var okCountEl = modal.querySelector("[data-role='okCount']");
+    var failCountEl = modal.querySelector("[data-role='failCount']");
+    var listEl = modal.querySelector("[data-role='orderList']");
+    var orderTitleEl = modal.querySelector("[data-role='orderTitle']");
+
+    var shopTotal = (steps && steps.length) || 0;
+    var okCount = (results && results.length) || 0;
+    var failCount = (failures && failures.length) || 0;
+
+    if (shopTotalEl) shopTotalEl.textContent = String(shopTotal);
+    if (okCountEl) okCountEl.textContent = String(okCount);
+    if (failCountEl) failCountEl.textContent = String(failCount);
+
+    if (listEl) listEl.innerHTML = "";
+
+    if (!results || !results.length) {
+      if (orderTitleEl) orderTitleEl.textContent = "暂无成功订单";
+    } else {
+      if (orderTitleEl) orderTitleEl.textContent = "已提交订单详情：";
+      results.forEach(function (r, idx) {
+        var item = document.createElement("div");
+        item.className = "order-item";
+        item.innerHTML =
+          "<div>" +
+          String(idx + 1) +
+          ". 店铺名称：<span>" +
+          safeText(r.shopName || "店铺") +
+          "</span></div>" +
+          "<div>订单号：<span>" +
+          safeText(r.orderId || "--") +
+          "</span></div>" +
+          "<div>商品数：<span>" +
+          safeText(r.count || 0) +
+          "</span></div>";
+        if (listEl) listEl.appendChild(item);
+      });
+    }
+
+    if (failures && failures.length) {
+      var failTitle = document.createElement("div");
+      failTitle.className = "order-list-title";
+      failTitle.textContent = "失败明细：";
+      if (listEl) listEl.appendChild(failTitle);
+
+      failures.forEach(function (f, idx) {
+        var item = document.createElement("div");
+        item.className = "order-item";
+        item.innerHTML =
+          "<div>" +
+          String(idx + 1) +
+          ". 店铺名称：<span>" +
+          safeText(f.shopName || "店铺") +
+          "</span></div>" +
+          "<div>原因：<span>" +
+          safeText(f.msg || "提交失败") +
+          "</span></div>";
+        if (listEl) listEl.appendChild(item);
+      });
+    }
+
+    modal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+  }
+
   function getCartValue() {
     try {
       var u = new URL(location.href);
@@ -690,7 +829,26 @@
 
     var actions = getAddressActionNodes();
     if (actions.add) list.appendChild(actions.add);
-    if (actions.topm) list.appendChild(actions.topm);
+    if (actions.topm) {
+      actions.topm.style.cursor = "pointer";
+      actions.topm.setAttribute("data-address-id", "TOPM");
+      if (actions.topm.dataset.picaiWired !== "1") {
+        actions.topm.dataset.picaiWired = "1";
+        actions.topm.addEventListener("click", function (e) {
+          e.stopPropagation();
+          selectedAddressId = "TOPM";
+          selectedAddress = null;
+          window.picai.qsa("[data-address-id]").forEach(function (el) {
+            el.style.outline = "none";
+            el.style.borderRadius = "10px";
+          });
+          actions.topm.style.outline = "2px solid rgba(106,124,255,0.55)";
+          actions.topm.style.borderRadius = "10px";
+          refreshFreightForGroups(lastCartGroups);
+        });
+      }
+      list.appendChild(actions.topm);
+    }
 
     // Fallback if prototype nodes are missing for some reason.
     if (!actions.add) {
@@ -700,16 +858,36 @@
       if (addItem) list.appendChild(addItem);
     }
     if (!actions.topm) {
-      var topmItem = makeSpecialAddressItem("TOPM收货仓", null);
+      var topmItem = makeSpecialAddressItem("TOPM收货仓", function () {
+        selectedAddressId = "TOPM";
+        selectedAddress = null;
+        window.picai.qsa("[data-address-id]").forEach(function (el) {
+          el.style.outline = "none";
+          el.style.borderRadius = "10px";
+        });
+        topmItem.style.outline = "2px solid rgba(106,124,255,0.55)";
+        topmItem.style.borderRadius = "10px";
+        refreshFreightForGroups(lastCartGroups);
+      });
+      if (topmItem) topmItem.setAttribute("data-address-id", "TOPM");
       if (topmItem) list.appendChild(topmItem);
     }
 
     if (!addrs.length) {
-      selectedAddressId = "";
+      // Allow selecting the "TOPM收货仓" even when user has no addresses.
+      if (selectedAddressId === "TOPM") {
+        var topmSel = list.querySelector("[data-address-id='TOPM']");
+        if (topmSel) {
+          topmSel.style.outline = "2px solid rgba(106,124,255,0.55)";
+          topmSel.style.borderRadius = "10px";
+        }
+      } else {
+        selectedAddressId = "";
+      }
       return;
     }
 
-    if (selectedAddressId) {
+    if (selectedAddressId && selectedAddressId !== "TOPM") {
       var selectedExists = addrs.some(function (x) {
         return String(x && x.address_id) === String(selectedAddressId);
       });
@@ -813,7 +991,13 @@
       list.appendChild(item);
     });
 
-    if (selectedAddressId) {
+    if (selectedAddressId === "TOPM") {
+      var topmSel2 = list.querySelector("[data-address-id='TOPM']");
+      if (topmSel2) {
+        topmSel2.style.outline = "2px solid rgba(106,124,255,0.55)";
+        topmSel2.style.borderRadius = "10px";
+      }
+    } else if (selectedAddressId) {
       var selected = addrs.find(function (x) {
         return String(x && x.address_id) === String(selectedAddressId);
       });
@@ -860,6 +1044,7 @@
     var kids = Array.prototype.slice.call(area.children);
     kids.forEach(function (k) {
       if (titleEl && k === titleEl) return;
+      if (k && k.id === "picaiConfirmTableHead") return;
       area.removeChild(k);
     });
   }
@@ -1178,7 +1363,8 @@
   async function createOrder() {
     if (!cartValue) return;
     if (isSubmitting) return;
-    if (!selectedAddressId) {
+    var submitAddressId = selectedAddressId === "TOPM" ? "0" : String(selectedAddressId || "");
+    if (!submitAddressId) {
       showMsg("请选择收货地址");
       return;
     }
@@ -1215,10 +1401,14 @@
       return;
     }
 
-    var submitBtn = document.querySelector("span.text_30");
+    var submitBtnWrap = document.querySelector(".text-wrapper_9");
+    var submitBtn = submitBtnWrap ? submitBtnWrap.querySelector("span.text_30") : document.querySelector("span.text_30");
     var originalBtnText = submitBtn ? submitBtn.textContent : "";
-    if (submitBtn) {
-      submitBtn.textContent = "提交中…";
+    if (submitBtn) submitBtn.textContent = "提交中…";
+    if (submitBtnWrap) {
+      submitBtnWrap.style.pointerEvents = "none";
+      submitBtnWrap.style.opacity = "0.75";
+    } else if (submitBtn) {
       submitBtn.style.pointerEvents = "none";
       submitBtn.style.opacity = "0.75";
     }
@@ -1228,6 +1418,7 @@
 
     var results = [];
     var failures = [];
+    var fatalErrorMsg = "";
     try {
       for (var i = 0; i < steps.length; i += 1) {
         steps[i].status = "doing";
@@ -1236,7 +1427,7 @@
 
         var resp = await $.apiPost(
           "/api/wholesales/goods.php?action=done",
-          $.withAuth({ done_cart_value: steps[i].recIds.join(","), address_id: String(selectedAddressId) })
+          $.withAuth({ done_cart_value: steps[i].recIds.join(","), address_id: submitAddressId })
         );
 
         if (String(resp.code) === "2") {
@@ -1247,6 +1438,16 @@
           return;
         }
 
+        // API contract: code > 0 means error; show msg and stop (do not show success modal).
+        var codeNum = parseInt(String(resp && resp.code), 10);
+        if (isFinite(codeNum) && codeNum > 0) {
+          steps[i].status = "fail";
+          steps[i].detail = "商品数：" + steps[i].recIds.length + "\n原因：" + String((resp && resp.msg) || "提交失败");
+          setSubmitProgress(steps);
+          fatalErrorMsg = String((resp && resp.msg) || "提交失败");
+          break;
+        }
+
         if (String(resp.code) === "0" && resp.data && resp.data.order_id) {
           steps[i].status = "done";
           steps[i].detail = "商品数：" + steps[i].recIds.length + "\n订单号：" + String(resp.data.order_id);
@@ -1255,57 +1456,37 @@
           steps[i].status = "fail";
           steps[i].detail = "商品数：" + steps[i].recIds.length + "\n原因：" + String((resp && resp.msg) || "提交失败");
           failures.push({ shopName: steps[i].shopName, msg: String((resp && resp.msg) || "提交失败") });
+          fatalErrorMsg = String((resp && resp.msg) || "提交失败");
+          break;
         }
         setSubmitProgress(steps);
       }
     } finally {
       isSubmitting = false;
-      if (submitBtn) {
-        submitBtn.textContent = originalBtnText || "提交";
+      if (submitBtn) submitBtn.textContent = originalBtnText || "提交";
+      if (submitBtnWrap) {
+        submitBtnWrap.style.pointerEvents = "";
+        submitBtnWrap.style.opacity = "";
+      } else if (submitBtn) {
         submitBtn.style.pointerEvents = "";
         submitBtn.style.opacity = "";
       }
       hideSubmitProgress();
     }
 
-    var lines = [];
-    lines.push("店铺数：" + steps.length);
-    lines.push("成功：" + results.length + "，失败：" + failures.length);
-    if (results.length) {
-      lines.push("");
-      lines.push("已提交订单：");
-      results.forEach(function (r, idx) {
-        lines.push((idx + 1) + ". " + r.shopName + "  订单号：" + r.orderId + "  商品数：" + r.count);
-      });
-    }
-    if (failures.length) {
-      lines.push("");
-      lines.push("失败明细：");
-      failures.forEach(function (f, idx) {
-        lines.push((idx + 1) + ". " + f.shopName + "  " + f.msg);
-      });
-    }
-
-    if ($ && $.showModalConfirm) {
-      var go = await $.showModalConfirm(lines.join("\n"), {
-        title: "提交完成",
-        confirmText: "查看订单",
-        cancelText: "关闭",
-        danger: false,
-        dismissible: false,
-      });
-      if (go) location.replace("/yuanxing/orders_list/index.html");
+    if (fatalErrorMsg) {
+      showMsg(fatalErrorMsg);
       return;
     }
 
-    showMsg(lines.join("\n"));
+    showSubmitResultModal(steps, results, failures);
   }
 
   function wireSubmit() {
-    var btn = document.querySelector("span.text_30");
-    if (!btn) return;
-    btn.style.cursor = "pointer";
-    btn.addEventListener("click", function () {
+    var btnWrap = document.querySelector(".text-wrapper_9");
+    if (!btnWrap) return;
+    btnWrap.style.cursor = "pointer";
+    btnWrap.addEventListener("click", function () {
       createOrder();
     });
   }

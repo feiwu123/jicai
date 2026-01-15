@@ -23,7 +23,18 @@
     $.mountLogoutMenu(settings);
   } catch (e) {}
 
-  var state = { keywords: "", catId: "", catName: "全部分类" };
+  var state = {
+    keywords: "",
+    catId: "",
+    catName: "全部分类",
+    page: 1,
+    reqSize: 15,
+    pageSize: 15,
+    total: 0,
+    totalPages: 1,
+    cartKeys: null,
+    cartFetchedAt: 0,
+  };
   var categories = null;
   var catMenu = null;
 
@@ -117,6 +128,7 @@
         e.stopPropagation();
         state.catId = String(catId || "");
         state.catName = label;
+        state.page = 1;
         setCategoryLabel(label);
         hideCategoryMenu();
         load();
@@ -261,6 +273,7 @@
 
       function doSearch() {
         state.keywords = String(input.value || "").trim();
+        state.page = 1;
         load();
       }
 
@@ -286,6 +299,160 @@
     return document.querySelector(".group_6");
   }
 
+  function ensureGoodsStyle() {
+    var id = "picaiGoodsPaginationStyle";
+    if (document.getElementById(id)) return;
+    var style = document.createElement("style");
+    style.id = id;
+    style.textContent =
+      "" +
+      "#picaiGoodsPagination{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px 12px 16px}" +
+      "#picaiGoodsPagination button{height:30px;min-width:30px;padding:0 10px;border:1px solid rgba(226,232,240,1);background:rgba(255,255,255,1);border-radius:8px;cursor:pointer;color:rgba(24,31,39,1)}" +
+      "#picaiGoodsPagination button[disabled]{opacity:0.55;cursor:default}" +
+      "#picaiGoodsPagination .picai-page-active{background:rgba(59,131,246,1);border-color:rgba(59,131,246,1);color:#fff}" +
+      "#picaiGoodsPagination .picai-page-ellipsis{padding:0 6px;color:rgba(100,116,139,1)}" +
+      ".picai-in-cart{background:#c6f9cf !important;border-radius:12px}";
+    document.head.appendChild(style);
+  }
+
+  function getGoodsId(goods) {
+    if (!goods) return "";
+    if (goods.goods_id == null) return "";
+    return String(goods.goods_id);
+  }
+
+  async function getCartKeys() {
+    var now = Date.now();
+    if (state.cartKeys && now - state.cartFetchedAt < 8000) return state.cartKeys;
+
+    var keys = new Set();
+    try {
+      var resp = await $.apiPost("/api/wholesales/goods.php?action=get_cart", $.withAuth({}));
+      if (String(resp.code) === "2") {
+        $.clearAuth();
+        showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
+        location.replace("/login.html");
+        return keys;
+      }
+      if (String(resp.code) !== "0") {
+        state.cartKeys = keys;
+        state.cartFetchedAt = now;
+        return keys;
+      }
+
+      var data = resp.data || {};
+
+      function addFromList(lists) {
+        if (!lists) return;
+        if (lists && !Array.isArray(lists)) lists = [lists];
+        (lists || []).forEach(function (it) {
+          if (!it) return;
+          if (it.goods_id != null) keys.add(String(it.goods_id));
+        });
+      }
+
+      // Common shape: data.lists is cart items array.
+      addFromList(data.lists || data.list);
+
+      // Some shapes: data.goods is array of shops that contain `lists`.
+      if (Array.isArray(data.goods)) {
+        data.goods.forEach(function (shop) {
+          if (!shop) return;
+          addFromList(shop.lists || shop.list);
+        });
+      }
+    } catch (e) {}
+
+    state.cartKeys = keys;
+    state.cartFetchedAt = now;
+    return keys;
+  }
+
+  function applyCartHighlight(row, goods, cartKeys) {
+    if (!row) return;
+    row.classList.remove("picai-in-cart");
+    var goodsId = getGoodsId(goods);
+    if (!goodsId) return;
+    if (cartKeys && cartKeys.has(goodsId)) row.classList.add("picai-in-cart");
+  }
+
+  function ensurePagination(area) {
+    if (!area) return null;
+    var el = area.querySelector("#picaiGoodsPagination");
+    if (el) return el;
+    el = document.createElement("div");
+    el.id = "picaiGoodsPagination";
+    area.appendChild(el);
+    return el;
+  }
+
+  function buildPageList(current, total) {
+    current = parseInt(current, 10) || 1;
+    total = parseInt(total, 10) || 1;
+    if (total <= 1) return [1];
+
+    var pages = [];
+    function push(n) {
+      if (pages.length && pages[pages.length - 1] === n) return;
+      pages.push(n);
+    }
+    function pushEllipsis() {
+      if (pages.length && pages[pages.length - 1] === "…") return;
+      pages.push("…");
+    }
+
+    push(1);
+    var start = Math.max(2, current - 2);
+    var end = Math.min(total - 1, current + 2);
+    if (start > 2) pushEllipsis();
+    for (var i = start; i <= end; i++) push(i);
+    if (end < total - 1) pushEllipsis();
+    push(total);
+    return pages;
+  }
+
+  function renderPagination(area) {
+    ensureGoodsStyle();
+    var bar = ensurePagination(area);
+    if (!bar) return;
+
+    var totalPages = parseInt(state.totalPages, 10) || 1;
+    var page = parseInt(state.page, 10) || 1;
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+
+    bar.innerHTML = "";
+
+    function makeBtn(label, targetPage, disabled, active) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = label;
+      if (active) btn.className = "picai-page-active";
+      btn.disabled = !!disabled;
+      btn.addEventListener("click", function () {
+        if (btn.disabled) return;
+        state.page = targetPage;
+        load();
+      });
+      return btn;
+    }
+
+    bar.appendChild(makeBtn("上一页", page - 1, page <= 1));
+
+    buildPageList(page, totalPages).forEach(function (p) {
+      if (p === "…") {
+        var s = document.createElement("span");
+        s.className = "picai-page-ellipsis";
+        s.textContent = "…";
+        bar.appendChild(s);
+        return;
+      }
+      bar.appendChild(makeBtn(String(p), p, false, p === page));
+    });
+
+    bar.appendChild(makeBtn("下一页", page + 1, page >= totalPages));
+  }
+
   function parseTemplate(area) {
     var header = area ? area.querySelector(".group_8") : null;
     if (!header) return null;
@@ -294,22 +461,33 @@
     return { header: header, row: row.cloneNode(true) };
   }
 
-  function clearRows(area, header) {
+  function clearRows(tpl) {
+    if (!tpl || !tpl.header) return;
+    var header = tpl.header;
     var node = header.nextElementSibling;
     while (node) {
+      if (node.id === "picaiGoodsPagination") break;
+      if (node.id === "picaiGoodsEmpty") {
+        var next0 = node.nextElementSibling;
+        node.parentNode.removeChild(node);
+        node = next0;
+        continue;
+      }
       var next = node.nextElementSibling;
       node.parentNode.removeChild(node);
       node = next;
     }
   }
 
-  function ensureEmpty(area, header, text) {
-    if (!area || !header) return;
+  function ensureEmpty(tpl, text) {
+    if (!tpl || !tpl.header) return;
+    var header = tpl.header;
+    var area = header.parentNode;
     var existing = area.querySelector("#picaiGoodsEmpty");
     if (!existing) {
       existing = document.createElement("div");
       existing.id = "picaiGoodsEmpty";
-      existing.style.width = "1553px";
+      existing.style.width = "calc(100% - 48px)";
       existing.style.height = "260px";
       existing.style.margin = "24px 0 0 24px";
       existing.style.display = "flex";
@@ -321,13 +499,17 @@
       existing.style.color = "rgba(84,98,116,1)";
       existing.style.fontSize = "14px";
       existing.style.letterSpacing = "0.2px";
-      area.appendChild(existing);
+
+      var pager = area.querySelector("#picaiGoodsPagination");
+      if (pager) area.insertBefore(existing, pager);
+      else area.appendChild(existing);
     }
     existing.textContent = String(text || "没有数据");
   }
 
-  function removeEmpty(area) {
-    if (!area) return;
+  function removeEmpty(tpl) {
+    if (!tpl || !tpl.header) return;
+    var area = tpl.header.parentNode;
     var existing = area.querySelector("#picaiGoodsEmpty");
     if (existing) existing.parentNode.removeChild(existing);
   }
@@ -469,6 +651,13 @@
           var resp = await $.apiPost("/api/wholesales/goods.php?action=add_to_cart", $.withAuth({ goods_id: String(goods.goods_id), number: String(qty) }));
           if (String(resp.code) === "0") {
             $.showModalMessage("已加入购物车", { autoCloseMs: 900 });
+            try {
+              if (state.cartKeys) state.cartKeys.add(getGoodsId(goods));
+              applyCartHighlight(row, goods, state.cartKeys);
+            } catch (e) {}
+            try {
+              if ($ && $.refreshCartBadge) $.refreshCartBadge();
+            } catch (e) {}
           } else if (String(resp.code) === "2") {
             $.clearAuth();
             $.showModalMessage("登录已失效，请重新登录", { autoCloseMs: 900 });
@@ -487,12 +676,15 @@
     var area = findGoodsArea();
     var tpl = parseTemplate(area);
     if (!tpl) return;
-    clearRows(area, tpl.header);
-    ensureEmpty(area, tpl.header, "正在加载数据…");
+    clearRows(tpl);
+    ensureEmpty(tpl, "正在加载数据…");
+    renderPagination(area);
+
+    var cartKeys = await getCartKeys();
 
     var resp = await $.apiPost(
       "/api/wholesales/goods.php?action=lists",
-      $.withAuth({ page: 1, size: 15, keywords: state.keywords, lang: "zh_cn", cat_id: state.catId })
+      $.withAuth({ page: state.page, size: state.reqSize, keywords: state.keywords, lang: "zh_cn", cat_id: state.catId })
     );
     if (String(resp.code) === "2") {
       $.clearAuth();
@@ -502,25 +694,38 @@
     }
     if (String(resp.code) !== "0") {
       showMsg((resp && resp.msg) || "加载失败");
-      ensureEmpty(area, tpl.header, "加载失败");
+      ensureEmpty(tpl, "加载失败");
       return;
     }
 
-    var list = (resp.data && (resp.data.list || resp.data.lists)) || [];
+    var data = resp.data || {};
+    state.page = parseInt(data.page != null ? data.page : state.page, 10) || state.page;
+    // API: num = total goods count; size = page size.
+    state.total = parseInt(data.num != null ? data.num : data.total != null ? data.total : data.count != null ? data.count : 0, 10) || 0;
+    state.pageSize = parseInt(data.size != null ? data.size : state.reqSize, 10) || state.reqSize;
+    state.totalPages = Math.max(1, Math.ceil(state.total / Math.max(1, state.pageSize || 1)));
+
+    var list = (data && (data.list || data.lists)) || [];
     if (list && !Array.isArray(list)) list = [list];
 
-    clearRows(area, tpl.header);
+    clearRows(tpl);
     if (!list.length) {
-      ensureEmpty(area, tpl.header, "没有数据");
+      ensureEmpty(tpl, "没有数据");
+      renderPagination(area);
       return;
     }
-    removeEmpty(area);
+    removeEmpty(tpl);
 
     list.forEach(function (g) {
       var row = tpl.row.cloneNode(true);
       setRow(row, g || {});
-      area.appendChild(row);
+      applyCartHighlight(row, g || {}, cartKeys);
+      var pager = area.querySelector("#picaiGoodsPagination");
+      if (pager) area.insertBefore(row, pager);
+      else area.appendChild(row);
     });
+
+    renderPagination(area);
   }
 
   mountSearchNextToCategory();

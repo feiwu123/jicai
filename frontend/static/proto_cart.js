@@ -6,11 +6,55 @@
   var cachedTemplates = null;
   var currentItems = [];
   var currentShops = {};
-  var state = { selected: {}, qtyEdits: {} };
+  var state = { selected: {}, qtyEdits: {}, collapsedShops: {} };
 
   function showMsg(msg, opts) {
     if ($ && $.showModalMessage) return $.showModalMessage(msg, opts || {});
     alert(msg);
+  }
+
+  function ensureCartExtraStyle() {
+    var id = "picaiCartExtraStyle";
+    if (document.getElementById(id)) return;
+    var style = document.createElement("style");
+    style.id = id;
+    style.textContent =
+      "" +
+      "#picaiCartTitlebar{display:flex;align-items:center;justify-content:space-between;width:100%;padding:24px 24px 0 24px;box-sizing:border-box}" +
+      "#picaiCartBulkDeleteBtn{height:32px;padding:0 12px;border:1px solid rgba(226,232,240,1);background:#fff;border-radius:8px;cursor:pointer;color:rgba(232,69,122,1);font-size:12px;font-weight:600}" +
+      "#picaiCartBulkDeleteBtn:disabled{opacity:0.6;cursor:default}" +
+      ".picai-shop-collapse{width:20px;height:20px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;border-radius:6px;color:rgba(84,98,116,1);cursor:pointer;user-select:none;transition:transform .15s ease;transform-origin:center;font-size:20px;line-height:20px}" +
+      ".picai-cart-shop.picai-collapsed .picai-cart-item-row{display:none}";
+    document.head.appendChild(style);
+  }
+
+  function mountBulkDeleteUI() {
+    try {
+      ensureCartExtraStyle();
+      var container = document.querySelector(".group_8");
+      if (!container) return;
+      if (document.getElementById("picaiCartTitlebar")) return;
+
+      var title = container.querySelector("span.text_30");
+      if (!title) return;
+
+      var bar = document.createElement("div");
+      bar.id = "picaiCartTitlebar";
+
+      // Move title span into a flex titlebar (keep original font styles; remove prototype margin).
+      title.style.margin = "0";
+      title.parentNode.insertBefore(bar, title);
+      bar.appendChild(title);
+
+      var btn = document.createElement("button");
+      btn.id = "picaiCartBulkDeleteBtn";
+      btn.type = "button";
+      btn.textContent = "批量删除";
+      btn.addEventListener("click", function () {
+        bulkDeleteSelected(btn);
+      });
+      bar.appendChild(btn);
+    } catch (e) {}
   }
 
   function ensureCartSkuBadge() {
@@ -350,6 +394,65 @@
     return ids;
   }
 
+  function getSelectedItems() {
+    var list = [];
+    currentItems.forEach(function (it) {
+      if (!it) return;
+      if (!isItemSelected(it)) return;
+      list.push(it);
+    });
+    return list;
+  }
+
+  async function bulkDeleteSelected(btn) {
+    var items = getSelectedItems();
+    if (!items.length) {
+      showMsg("请先勾选要删除的商品");
+      return;
+    }
+
+    var ok = true;
+    try {
+      ok = window.confirm("确定删除选中的 " + items.length + " 个商品吗？");
+    } catch (e) {}
+    if (!ok) return;
+
+    if (btn) {
+      btn.disabled = true;
+      btn.style.pointerEvents = "none";
+    }
+    showBusyMask("正在删除...");
+
+    var failed = 0;
+    try {
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var gid = it && it.goods_id != null ? String(it.goods_id) : "";
+        if (!gid) continue;
+        var resp = await $.apiPost("/api/wholesales/goods.php?action=del_cart", $.withAuth({ goods_id: gid }));
+        if (String(resp.code) === "0") continue;
+        if (String(resp.code) === "2") {
+          $.clearAuth();
+          showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
+          location.replace("/login.html");
+          return;
+        }
+        failed += 1;
+      }
+
+      if (failed) showMsg("删除完成，但有 " + failed + " 项删除失败");
+      else showMsg("已删除", { autoCloseMs: 900 });
+    } finally {
+      hideBusyMask();
+      if (btn) {
+        btn.disabled = false;
+        btn.style.pointerEvents = "";
+      }
+    }
+
+    load();
+  }
+
   function wireSubmit() {
     var btnHost = document.querySelector(".text-wrapper_6");
     if (!btnHost) return;
@@ -425,6 +528,10 @@
   }
 
   function setItemRow(row, item, refresh) {
+    try {
+      row.classList.add("picai-cart-item-row");
+    } catch (e) {}
+
     var img = row.querySelector("img.label_3") || row.querySelector("img");
     if (img && item.goods_thumb) img.src = item.goods_thumb;
 
@@ -532,6 +639,7 @@
   }
 
   async function load() {
+    mountBulkDeleteUI();
     removeStaticSectionsOutsideGroup12();
     // Summary (right panel) shows "暂无" until cart data arrives.
     setSummary(null, { loading: true, placeholder: "暂无" });
@@ -584,13 +692,41 @@
       var shop = (g && g.shop) || {};
       var shopId = String(shop.user_id || "");
 
+      var shopWrap = document.createElement("div");
+      shopWrap.className = "picai-cart-shop";
+      shopWrap.dataset.shopId = shopId;
+      if (state.collapsedShops && state.collapsedShops[shopId]) shopWrap.classList.add("picai-collapsed");
+
       var shopHeader = tpl.shopHeader.cloneNode(true);
       if (idx > 0) shopHeader.style.marginTop = "16px";
       var shopNameEl = shopHeader.querySelector("span.text_36");
       if (shopNameEl) shopNameEl.textContent = shop.shop_name || "店铺";
 
       var shopBox = shopHeader.querySelector(".group_13");
-      currentShops[shopId] = { checkboxEl: shopBox || null, items: [] };
+
+      var collapseBtn = document.createElement("div");
+      collapseBtn.className = "picai-shop-collapse";
+      collapseBtn.title = "折叠/展开";
+      collapseBtn.textContent = "▾";
+      collapseBtn.style.marginLeft = "auto";
+      if (shopWrap.classList.contains("picai-collapsed")) collapseBtn.style.transform = "rotate(180deg)";
+      collapseBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var next = !shopWrap.classList.contains("picai-collapsed");
+        if (next) {
+          shopWrap.classList.add("picai-collapsed");
+          collapseBtn.style.transform = "rotate(180deg)";
+        } else {
+          shopWrap.classList.remove("picai-collapsed");
+          collapseBtn.style.transform = "";
+        }
+        if (!state.collapsedShops) state.collapsedShops = {};
+        state.collapsedShops[shopId] = next;
+      });
+      shopHeader.appendChild(collapseBtn);
+
+      currentShops[shopId] = { checkboxEl: shopBox || null, items: [], wrapEl: shopWrap, collapseEl: collapseBtn };
 
       if (shopBox) {
         shopBox.addEventListener("click", function (e) {
@@ -611,7 +747,8 @@
         });
       }
 
-      area.appendChild(shopHeader);
+      shopWrap.appendChild(shopHeader);
+      area.appendChild(shopWrap);
 
       var items = (g && g.lists) || [];
       if (items && !Array.isArray(items)) items = [items];
@@ -626,7 +763,7 @@
 
         var row = tpl.itemRow.cloneNode(true);
         setItemRow(row, it, refresh);
-        area.appendChild(row);
+        shopWrap.appendChild(row);
       });
     });
 

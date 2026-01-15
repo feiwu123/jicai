@@ -1,0 +1,238 @@
+/* Overrides to adapt Lanhu prototype auth pages for real form elements. */
+
+body.lanhu-auth {
+  margin: 0;
+}
+
+body.lanhu-auth .page {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+}
+
+body.lanhu-auth-center .group_1,
+body.lanhu-auth-center .block_1 {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 80px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  body.lanhu-auth-center .group_1,
+  body.lanhu-auth-center .block_1 {
+    padding: 32px 16px;
+  }
+}
+
+body.lanhu-auth-center .box_1,
+body.lanhu-auth-center .group_1 > .block_1 {
+  margin: 0;
+}
+
+/* Login: follow prototype "top + right" placement, but stay visible on smaller screens. */
+body.lanhu-auth-login .group_1 {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  display: block;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body.lanhu-auth-login .box_1 {
+  margin: 0;
+  position: fixed;
+  top: 50%;
+  right: 22vw;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 1100px) {
+  body.lanhu-auth-login .group_1 {
+    padding: 0;
+  }
+
+  body.lanhu-auth-login .box_1 {
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Register: align modal like login (viewport-based). */
+body.lanhu-auth-register .block_1 {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  display: block;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body.lanhu-auth-register .box_1 {
+  margin: 0;
+  position: fixed;
+  top: 50%;
+  right: 22vw;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 1100px) {
+  body.lanhu-auth-register .box_1 {
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+  }
+}
+
+body.lanhu-auth .text-wrapper_1,
+body.lanhu-auth .text-wrapper_2,
+body.lanhu-auth .text-wrapper_3,
+body.lanhu-auth .text-wrapper_4,
+body.lanhu-auth .text-wrapper_5,
+body.lanhu-auth .text-wrapper_6 {
+  display: flex;
+  align-items: center;
+}
+
+body.lanhu-auth .lanhu-input {
+  width: 100%;
+  height: 100%;
+  padding: 0 16px;
+  font-size: 16px;
+  color: rgba(51, 51, 51, 1);
+  outline: none;
+}
+
+body.lanhu-auth .lanhu-input::placeholder {
+  color: rgba(117, 117, 117, 1);
+}
+
+body.lanhu-auth a.text_8,
+body.lanhu-auth a.text_11 {
+  display: inline-block;
+}
+
+body.lanhu-auth a.text_8,
+body.lanhu-auth a.text_11,
+body.lanhu-auth a.text_13 {
+  text-decoration: none;
+}
+
+body.lanhu-auth-login .text-wrapper_3 {
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+}
+
+body.lanhu-auth-login .text-wrapper_3 .text_9 {
+  margin: 0;
+  width: auto;
+}
+
+body.lanhu-auth-login .text-wrapper_3:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+body.lanhu-auth-login #remember {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  appearance: none;
+  border: 1px solid rgba(0, 0, 0, 1);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 1);
+  cursor: pointer;
+  position: relative;
+}
+
+body.lanhu-auth-login #remember:checked {
+  background: rgba(102, 126, 234, 1);
+  border-color: rgba(102, 126, 234, 1);
+}
+
+body.lanhu-auth-login #remember:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 7px;
+  border: 2px solid rgba(255, 255, 255, 1);
+  border-top: 0;
+  border-left: 0;
+  transform: rotate(45deg);
+}
+
+body.lanhu-auth-register .text-wrapper_5 {
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+}
+
+body.lanhu-auth-register .text-wrapper_5 .text_11 {
+  margin: 0;
+  width: auto;
+}
+
+body.lanhu-auth .lanhu-err {
+  margin: 10px 40px 0 40px;
+  min-height: 18px;
+  font-size: 12px;
+  color: #d11a2a;
+}
+
+body.lanhu-auth .lanhu-links {
+  margin-left: auto;
+  gap: 12px;
+}
+
+body.lanhu-auth .lanhu-link-btn {
+  font-size: 13px;
+  color: rgba(102, 126, 234, 1);
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+}
+
+body.lanhu-auth .lanhu-code-row {
+  width: 320px;
+  margin: 10px 0 0 40px;
+  display: flex;
+  gap: 10px;
+}
+
+body.lanhu-auth .lanhu-code-input {
+  flex: 1;
+  margin: 0;
+  width: auto;
+}
+
+body.lanhu-auth .lanhu-send-btn {
+  width: 102px;
+  height: 47px;
+  border-radius: 10px;
+  border: 2px solid rgba(238, 238, 238, 1);
+  background-color: rgba(240, 240, 240, 1);
+  font-size: 13px;
+  color: rgba(102, 126, 234, 1);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+body.lanhu-auth .lanhu-send-btn[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}

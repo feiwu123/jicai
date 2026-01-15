@@ -10,6 +10,16 @@
   var countdownTimer = null;
   var countdownLeft = 0;
 
+  function setBtnText(btn, text) {
+    if (!btn) return;
+    var target = btn.querySelector && btn.querySelector("[data-btn-text]");
+    if (target) {
+      target.textContent = text;
+    } else {
+      btn.textContent = text;
+    }
+  }
+
   function show(msg, opts) {
     if ($ && $.showModalMessage) return $.showModalMessage(msg, opts || {});
     alert(msg);
@@ -27,21 +37,21 @@
     }
     countdownLeft = 0;
     btnSend.disabled = false;
-    btnSend.textContent = "发送验证码";
+    setBtnText(btnSend, "发送验证码");
   }
 
   function startCountdown(seconds) {
     stopCountdown();
     countdownLeft = seconds || 60;
     btnSend.disabled = true;
-    btnSend.textContent = "重新发送(" + countdownLeft + "s)";
+    setBtnText(btnSend, "重新发送(" + countdownLeft + "s)");
     countdownTimer = setInterval(function () {
       countdownLeft -= 1;
       if (countdownLeft <= 0) {
         stopCountdown();
         return;
       }
-      btnSend.textContent = "重新发送(" + countdownLeft + "s)";
+      setBtnText(btnSend, "重新发送(" + countdownLeft + "s)");
     }, 1000);
   }
 
@@ -53,7 +63,7 @@
       return;
     }
     btnSend.disabled = true;
-    btnSend.textContent = "发送中...";
+    setBtnText(btnSend, "发送中...");
     try {
       // API doc: users.php?action=edit_pass_email_send { email }
       var resp = await $.apiPost("/api/wholesales/users.php?action=edit_pass_email_send", { email: email });
@@ -68,7 +78,7 @@
     } finally {
       if (countdownLeft <= 0) {
         btnSend.disabled = false;
-        btnSend.textContent = "发送验证码";
+        setBtnText(btnSend, "发送验证码");
       }
     }
   }
@@ -85,7 +95,7 @@
     if (pass !== pass2) return show("两次输入的密码不一致");
 
     btnSubmit.disabled = true;
-    btnSubmit.textContent = "提交中...";
+    setBtnText(btnSubmit, "提交中...");
     try {
       // API doc: users.php?action=act_edit_password { email, email_code, new_password, confirm_password }
       var resp = await $.apiPost("/api/wholesales/users.php?action=act_edit_password", {
@@ -107,7 +117,7 @@
       show("网络错误：" + (e && e.message ? e.message : String(e)));
     } finally {
       btnSubmit.disabled = false;
-      btnSubmit.textContent = "提交修改";
+      setBtnText(btnSubmit, "提交修改");
     }
   }
 

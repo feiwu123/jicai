@@ -703,7 +703,13 @@
     alignHeaderRightIcons();
     normalizeLeftMenuForAddressNav();
     // Auto-mount cart badge on any page that has the cart icon.
-    if (document.querySelector(".group_4")) {
+    var disableCartBadge = false;
+    try {
+      var u = new URL(location.href);
+      disableCartBadge = String(u.searchParams.get("no_cart_badge") || "") === "1";
+    } catch (e) {}
+
+    if (!disableCartBadge && document.querySelector(".group_4")) {
       ensureCartBadge();
       refreshCartBadge();
     }

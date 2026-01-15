@@ -1,0 +1,226 @@
+.page {
+  background-color: rgba(248, 249, 251, 1);
+  position: relative;
+  width: 100%;
+  height: 1092px;
+  overflow: hidden;
+}
+
+.group_1 {
+  height: 1092px;
+  background: url(./img/FigmaDDSSlicePNG8b93e9839bc6b043acebe60b4d4d4524.png)
+    100% no-repeat;
+  background-size: 100% 100%;
+  width: 1972px;
+}
+
+.box_1 {
+  box-shadow: 0px 8px 24px 0px rgba(0, 0, 0, 0.12);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  width: 400px;
+  height: 510px;
+  margin: 281px 0 0 1144px;
+}
+
+.text_1 {
+  width: 116px;
+  height: 35px;
+  overflow-wrap: break-word;
+  color: rgba(51, 51, 51, 1);
+  font-size: 28px;
+  font-family: Inter-Bold;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 28px;
+  margin: 43px 0 0 143px;
+}
+
+.text_2 {
+  width: 188px;
+  height: 17px;
+  overflow-wrap: break-word;
+  color: rgba(102, 102, 102, 1);
+  font-size: 14px;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 14px;
+  margin: 12px 0 0 107px;
+}
+
+.text_3 {
+  width: 55px;
+  height: 16px;
+  overflow-wrap: break-word;
+  color: rgba(85, 85, 85, 1);
+  font-size: 13px;
+  font-family: Inter-Semi Bold;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 13px;
+  margin: 36px 0 0 40px;
+}
+
+.text-wrapper_1 {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 10px;
+  height: 47px;
+  border: 2px solid rgba(238, 238, 238, 1);
+  width: 320px;
+  margin: 9px 0 0 40px;
+}
+
+.text_4 {
+  width: 286px;
+  height: 19px;
+  overflow-wrap: break-word;
+  color: rgba(117, 117, 117, 1);
+  font-size: 16px;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 16px;
+  margin: 14px 0 0 17px;
+}
+
+.text_5 {
+  width: 28px;
+  height: 16px;
+  overflow-wrap: break-word;
+  color: rgba(85, 85, 85, 1);
+  font-size: 13px;
+  font-family: Inter-Semi Bold;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 13px;
+  margin: 26px 0 0 40px;
+}
+
+.text-wrapper_2 {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 10px;
+  height: 47px;
+  border: 2px solid rgba(238, 238, 238, 1);
+  width: 320px;
+  margin: 9px 0 0 40px;
+}
+
+.text_6 {
+  width: 286px;
+  height: 19px;
+  overflow-wrap: break-word;
+  color: rgba(117, 117, 117, 1);
+  font-size: 16px;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 16px;
+  margin: 14px 0 0 17px;
+}
+
+.block_1 {
+  width: 320px;
+  height: 16px;
+  margin: 26px 0 0 40px;
+}
+
+.group_2 {
+  border-radius: 2px;
+  width: 13px;
+  height: 13px;
+  border: 1px solid rgba(0, 0, 0, 1);
+  margin-top: 1px;
+}
+
+.text_7 {
+  width: 45px;
+  height: 16px;
+  overflow-wrap: break-word;
+  color: rgba(102, 102, 102, 1);
+  font-size: 13px;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 13px;
+  margin-left: 8px;
+}
+
+.text_8 {
+  width: 68px;
+  height: 16px;
+  overflow-wrap: break-word;
+  color: rgba(102, 126, 234, 1);
+  font-size: 13px;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 13px;
+  margin-left: 186px;
+}
+
+.text-wrapper_3 {
+  background-image: linear-gradient(
+    90deg,
+    rgba(102, 126, 234, 1) 0,
+    rgba(118, 75, 162, 1) 100%
+  );
+  border-radius: 10px;
+  height: 47px;
+  width: 320px;
+  margin: 25px 0 0 40px;
+}
+
+.text_9 {
+  width: 64px;
+  height: 19px;
+  overflow-wrap: break-word;
+  color: rgba(255, 255, 255, 1);
+  font-size: 16px;
+  font-family: Inter-Semi Bold;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 16px;
+  margin: 14px 0 0 128px;
+}
+
+.text-wrapper_4 {
+  width: 140px;
+  height: 16px;
+  margin: 25px 0 42px 131px;
+}
+
+.text_10 {
+  width: 82px;
+  height: 16px;
+  overflow-wrap: break-word;
+  color: rgba(102, 102, 102, 1);
+  font-size: 13px;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 13px;
+}
+
+.text_11 {
+  width: 55px;
+  height: 16px;
+  overflow-wrap: break-word;
+  color: rgba(102, 126, 234, 1);
+  font-size: 13px;
+  font-family: Inter-Semi Bold;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 13px;
+}

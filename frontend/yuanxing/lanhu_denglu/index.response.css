@@ -1,0 +1,226 @@
+.page {
+  background-color: rgba(248, 249, 251, 1);
+  position: relative;
+  width: 100vw;
+  height: 56.88vw;
+  overflow: hidden;
+}
+
+.group_1 {
+  height: 56.88vw;
+  background: url(./img/FigmaDDSSlicePNG8b93e9839bc6b043acebe60b4d4d4524.png)
+    100% no-repeat;
+  background-size: 100% 100%;
+  width: 102.71vw;
+}
+
+.box_1 {
+  box-shadow: 0px 8px 24px 0px rgba(0, 0, 0, 0.12);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  width: 20.84vw;
+  height: 26.57vw;
+  margin: 14.63vw 0 0 59.58vw;
+}
+
+.text_1 {
+  width: 6.05vw;
+  height: 1.83vw;
+  overflow-wrap: break-word;
+  color: rgba(51, 51, 51, 1);
+  font-size: 1.45vw;
+  font-family: Inter-Bold;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 1.46vw;
+  margin: 2.23vw 0 0 7.44vw;
+}
+
+.text_2 {
+  width: 9.8vw;
+  height: 0.89vw;
+  overflow-wrap: break-word;
+  color: rgba(102, 102, 102, 1);
+  font-size: 0.72vw;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 0.73vw;
+  margin: 0.62vw 0 0 5.57vw;
+}
+
+.text_3 {
+  width: 2.87vw;
+  height: 0.84vw;
+  overflow-wrap: break-word;
+  color: rgba(85, 85, 85, 1);
+  font-size: 0.67vw;
+  font-family: Inter-Semi Bold;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 0.68vw;
+  margin: 1.87vw 0 0 2.08vw;
+}
+
+.text-wrapper_1 {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 10px;
+  height: 2.45vw;
+  border: 2px solid rgba(238, 238, 238, 1);
+  width: 16.67vw;
+  margin: 0.46vw 0 0 2.08vw;
+}
+
+.text_4 {
+  width: 14.9vw;
+  height: 0.99vw;
+  overflow-wrap: break-word;
+  color: rgba(117, 117, 117, 1);
+  font-size: 0.83vw;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 0.84vw;
+  margin: 0.72vw 0 0 0.88vw;
+}
+
+.text_5 {
+  width: 1.46vw;
+  height: 0.84vw;
+  overflow-wrap: break-word;
+  color: rgba(85, 85, 85, 1);
+  font-size: 0.67vw;
+  font-family: Inter-Semi Bold;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 0.68vw;
+  margin: 1.35vw 0 0 2.08vw;
+}
+
+.text-wrapper_2 {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 10px;
+  height: 2.45vw;
+  border: 2px solid rgba(238, 238, 238, 1);
+  width: 16.67vw;
+  margin: 0.46vw 0 0 2.08vw;
+}
+
+.text_6 {
+  width: 14.9vw;
+  height: 0.99vw;
+  overflow-wrap: break-word;
+  color: rgba(117, 117, 117, 1);
+  font-size: 0.83vw;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 0.84vw;
+  margin: 0.72vw 0 0 0.88vw;
+}
+
+.block_1 {
+  width: 16.67vw;
+  height: 0.84vw;
+  margin: 1.35vw 0 0 2.08vw;
+}
+
+.group_2 {
+  border-radius: 2px;
+  width: 0.68vw;
+  height: 0.68vw;
+  border: 1px solid rgba(0, 0, 0, 1);
+  margin-top: 0.06vw;
+}
+
+.text_7 {
+  width: 2.35vw;
+  height: 0.84vw;
+  overflow-wrap: break-word;
+  color: rgba(102, 102, 102, 1);
+  font-size: 0.67vw;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 0.68vw;
+  margin-left: 0.42vw;
+}
+
+.text_8 {
+  width: 3.55vw;
+  height: 0.84vw;
+  overflow-wrap: break-word;
+  color: rgba(102, 126, 234, 1);
+  font-size: 0.67vw;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 0.68vw;
+  margin-left: 9.69vw;
+}
+
+.text-wrapper_3 {
+  background-image: linear-gradient(
+    90deg,
+    rgba(102, 126, 234, 1) 0,
+    rgba(118, 75, 162, 1) 100%
+  );
+  border-radius: 10px;
+  height: 2.45vw;
+  width: 16.67vw;
+  margin: 1.3vw 0 0 2.08vw;
+}
+
+.text_9 {
+  width: 3.34vw;
+  height: 0.99vw;
+  overflow-wrap: break-word;
+  color: rgba(255, 255, 255, 1);
+  font-size: 0.83vw;
+  font-family: Inter-Semi Bold;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 0.84vw;
+  margin: 0.72vw 0 0 6.66vw;
+}
+
+.text-wrapper_4 {
+  width: 7.3vw;
+  height: 0.84vw;
+  margin: 1.3vw 0 2.18vw 6.82vw;
+}
+
+.text_10 {
+  width: 4.28vw;
+  height: 0.84vw;
+  overflow-wrap: break-word;
+  color: rgba(102, 102, 102, 1);
+  font-size: 0.67vw;
+  font-family: Inter-Regular;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 0.68vw;
+}
+
+.text_11 {
+  width: 2.87vw;
+  height: 0.84vw;
+  overflow-wrap: break-word;
+  color: rgba(102, 126, 234, 1);
+  font-size: 0.67vw;
+  font-family: Inter-Semi Bold;
+  font-weight: NaN;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 0.68vw;
+}

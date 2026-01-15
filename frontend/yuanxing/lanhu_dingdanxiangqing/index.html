@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>订单详情</title>
+    <script src="./flexible.js"></script>
+    <link rel="stylesheet" type="text/css" href="./common.css" />
+    <link rel="stylesheet" type="text/css" href="/yuanxing/orders_list/index.css" />
+    <link rel="stylesheet" type="text/css" href="./detail_scoped.css" />
+    <link rel="stylesheet" type="text/css" href="./detail_overrides.css" />
+  </head>
+  <body>
+    <div class="page flex-col picai-order-detail-page">
+      <div class="box_1 flex-row">
+        <div class="section_1 flex-col">
+          <div class="block_1 flex-row">
+            <img
+              class="label_1"
+              referrerpolicy="no-referrer"
+              alt="logo"
+              src="/yuanxing/orders_list/img/FigmaDDSSlicePNG0e2eef7e5c91fe2839caad9b48652eab.png"
+            />
+            <img
+              class="image_7"
+              referrerpolicy="no-referrer"
+              alt="TOPM"
+              src="/yuanxing/orders_list/img/FigmaDDSSlicePNG3481b060914b633f018cfe6928a4910c.png"
+            />
+          </div>
+        </div>
+        <span class="text_2">订单详情</span>
+        <div class="section_2 flex-row">
+          <img
+            class="thumbnail_1"
+            referrerpolicy="no-referrer"
+            alt="search"
+            src="/yuanxing/orders_list/img/FigmaDDSSlicePNGa816e979a7ffeef0ae5d5b2f80426e7e.png"
+          />
+          <span class="text_3">请输入关键字</span>
+        </div>
+        <div class="section_3 flex-col">
+          <div class="section_4 flex-col"></div>
+        </div>
+      </div>
+
+      <div class="box_7 flex-row justify-between">
+        <div class="group_1 flex-col">
+          <div class="block_2 flex-row">
+            <img
+              class="label_2"
+              referrerpolicy="no-referrer"
+              alt="avatar"
+              src="/yuanxing/orders_list/img/FigmaDDSSlicePNG0679e85faacc407255f9ac399a06066d.png"
+            />
+            <div class="text-wrapper_36 flex-col justify-between">
+              <span class="text_4">Global</span>
+              <span class="text_5">余额：-</span>
+            </div>
+            <img
+              class="thumbnail_2"
+              referrerpolicy="no-referrer"
+              alt="settings"
+              src="/yuanxing/orders_list/img/FigmaDDSSlicePNGb028d9f36433fc12f35106a2fd8cd041.png"
+            />
+          </div>
+          <span class="text_6">前台</span>
+          <div class="block_7 flex-row justify-between">
+            <img
+              class="thumbnail_3"
+              referrerpolicy="no-referrer"
+              alt="menu"
+              src="/yuanxing/orders_list/img/FigmaDDSSlicePNGce57972dc06cf81042727b817d3354d3.png"
+            />
+            <span class="text_7">批采列表</span>
+          </div>
+          <span class="text_8">个人中心</span>
+          <div class="block_4 flex-col">
+            <div class="box_3 flex-row">
+              <img
+                class="thumbnail_4"
+                referrerpolicy="no-referrer"
+                alt="menu"
+                src="/yuanxing/orders_list/img/FigmaDDSSlicePNG102b28b790d14850b28227ac6fe98e33.png"
+              />
+              <span class="text_9">订单列表</span>
+            </div>
+          </div>
+          <div class="picai-left-menu-btn" data-nav="address_manage">
+            <img
+              referrerpolicy="no-referrer"
+              alt="地址管理"
+              src="/yuanxing/lanhu_dizhiguanli/img/icon_address_pin_gray.svg"
+            />
+            <span>地址管理</span>
+          </div>
+        </div>
+
+        <div class="block_8 flex-col">
+          <div id="picaiOrderDetail">
+            <div class="page flex-col picai-order-detail-content">
+              <div class="group_4 flex-col">
+                <span class="text_4">下单流程</span>
+                <div class="box_1 flex-col"></div>
+                <div class="text-wrapper_1 flex-row">
+                  <span class="text_5">下单</span>
+                  <span class="picai-step-time picai-step-time-1">--</span>
+                  <span class="text_6">支付</span>
+                  <span class="picai-step-time picai-step-time-2">--</span>
+                  <span class="text_7">发货</span>
+                  <span class="picai-step-time picai-step-time-3">--</span>
+                </div>
+                <div class="text-wrapper_3 flex-col">
+                  <span class="text_13">1</span>
+                </div>
+                <div class="text-wrapper_4 flex-col">
+                  <span class="text_14">2</span>
+                </div>
+                <div class="text-wrapper_5 flex-col">
+                  <span class="text_15">3</span>
+                </div>
+              </div>
+
+              <div class="list_1 flex-col">
+                <div class="list-items_1-0 flex-col">
+                  <div class="text-wrapper_7-0 flex-row">
+                    <span class="text_17-0">订单信息</span>
+                  </div>
+                  <div class="text-wrapper_8-0 flex-row">
+                    <span class="text_18-0">订单号：</span>
+                    <span class="text_19-0">--</span>
+                    <span class="text_20-0">复制</span>
+                    <span class="text_21-0">下单时间：</span>
+                    <span class="text_23-0">--</span>
+                  </div>
+                  <div class="text-wrapper_9-0 flex-row">
+                    <span class="text_24-0">支付方式：</span>
+                    <span class="text_25-0">--</span>
+                    <span class="text_26-0">订单状态：</span>
+                    <span class="text_27-0">--</span>
+                  </div>
+                </div>
+                <div class="list-items_1-1 flex-col">
+                  <div class="text-wrapper_7-1 flex-row">
+                    <span class="text_17-1">收件人信息</span>
+                  </div>
+                  <div class="text-wrapper_8-1 flex-row">
+                    <span class="text_18-1">收件人：</span>
+                    <span class="text_19-1">--</span>
+                    <span class="text_21-1">手机号：</span>
+                    <span class="text_22-1">--</span>
+                  </div>
+                  <div class="text-wrapper_9-1 flex-row">
+                    <span class="text_24-1">收货地址：</span>
+                    <span class="text_25-1">--</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="group_5 flex-col">
+                <span class="text_28">物流信息</span>
+                <div class="group_6 flex-row">
+                  <div class="text-group_1 flex-col">
+                    <span class="text_29">--</span>
+                    <span class="text_30"></span>
+                    <span class="text_31"></span>
+                  </div>
+                </div>
+                <div class="group_7 flex-row">
+                  <div class="text-group_2 flex-col justify-between">
+                    <span class="text_32"></span>
+                    <span class="text_33"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="group_8 flex-col">
+                <span class="text_28">商品列表</span>
+                <div class="picai-goods-table-wrap">
+                  <table class="picai-goods-table" aria-label="商品列表">
+                    <colgroup>
+                      <col style="width: 414px" />
+                      <col style="width: 383px" />
+                      <col style="width: 379px" />
+                      <col style="width: 379px" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th class="col-name">商品</th>
+                        <th class="col-sku">SKU</th>
+                        <th class="col-unit col-num">单价</th>
+                        <th class="col-total col-num">总价</th>
+                      </tr>
+                    </thead>
+                    <tbody id="picaiGoodsTbody">
+                      <tr>
+                        <td colspan="4" class="picai-goods-empty">加载中…</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="text-wrapper_17 flex-row">
+                  <span class="text_41">商品件数：0 件</span>
+                </div>
+                <div class="text-wrapper_18 flex-row">
+                  <span class="text_42">商品总金额：¥0.00</span>
+                </div>
+                <div class="text-wrapper_20 flex-row">
+                  <span class="text_44">运费：¥0.00</span>
+                </div>
+                <div class="text-wrapper_21 flex-row">
+                  <span class="text_45">实付金额：¥0.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/api.js"></script>
+    <script src="/static/profile.js"></script>
+    <script src="/static/proto_order_detail.js"></script>
+  </body>
+</html>

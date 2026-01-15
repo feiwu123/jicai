@@ -1,14 +1,14 @@
 .page {
   background-color: rgba(248, 249, 251, 1);
   position: relative;
-  width: 1920px;
+  width:100%;
   height: 1080px;
   overflow: hidden;
 }
 
 .group_1 {
   background-color: rgba(255, 255, 255, 1);
-  width: 1920px;
+  width:100%;
   height: 63px;
 }
 
@@ -1369,7 +1369,7 @@
 .group_12 {
   background-color: rgba(0, 0, 0, 0.6);
   height: 1080px;
-  width: 1920px;
+  width:100%;
   position: absolute;
   left: 0;
   top: 0;
