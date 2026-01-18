@@ -231,6 +231,8 @@
         ".picai-logistics-modal .picai-trace-item--first:before{background:rgba(232,69,122,1)}" +
         ".picai-logistics-modal .picai-trace-time{font-size:12px;color:rgba(84,98,116,1);line-height:16px}" +
         ".picai-logistics-modal .picai-trace-desc{margin-top:6px;font-size:14px;color:rgba(24,31,39,1);line-height:18px;white-space:pre-wrap;word-break:break-word}" +
+        ".picai-logistics-modal .picai-sig-link{margin-left:8px;color:rgba(22,93,255,1);text-decoration:none;border:1px solid rgba(22,93,255,0.35);padding:1px 8px;border-radius:999px;font-size:12px;line-height:16px;display:inline-flex;align-items:center}" +
+        ".picai-logistics-modal .picai-sig-link:hover{background:rgba(22,93,255,0.08)}" +
         ".picai-logistics-modal .picai-trace-empty{margin:18px 24px 0 24px;color:rgba(84,98,116,1);font-size:14px}" +
         "";
       document.head.appendChild(style);
@@ -349,6 +351,7 @@
         details.forEach(function (it, idx) {
           var time = (it && (it.scanTime || it.scan_time || it.time)) || "";
           var desc = (it && (it.desc || it.description || it.context)) || "";
+          var sigPicUrl = (it && (it.sigPicUrl || it.sig_pic_url)) || "";
 
           var row = document.createElement("div");
           row.className = "picai-trace-item" + (idx === 0 ? " picai-trace-item--first" : "");
@@ -360,6 +363,26 @@
           var d = document.createElement("div");
           d.className = "picai-trace-desc";
           d.textContent = String(desc || "");
+
+          // If the API provides a signature picture URL, append a "查看" link after the time.
+          // (details is an array; each element may contain sigPicUrl)
+          try {
+            var u = String(sigPicUrl || "").trim();
+            if (u && !/^javascript:/i.test(u)) {
+              // Allow relative URLs by resolving against current page.
+              try {
+                u = String(new URL(u, location.href));
+              } catch (e) {}
+              var a = document.createElement("a");
+              a.className = "picai-sig-link";
+              a.textContent = "查看";
+              a.href = u;
+              a.target = "_blank";
+              a.rel = "noopener noreferrer";
+              t.appendChild(document.createTextNode(" "));
+              t.appendChild(a);
+            }
+          } catch (e) {}
 
           row.appendChild(t);
           row.appendChild(d);
@@ -669,6 +692,8 @@
       if (viewOrderBtn && viewOrderBtn.parentNode) viewOrderBtn.parentNode.removeChild(viewOrderBtn);
       var payBtn = node.querySelector(".pay-now-btn");
       if (payBtn && payBtn.parentNode) payBtn.parentNode.removeChild(payBtn);
+      var refundBtnEl = node.querySelector(".refund-btn");
+      if (refundBtnEl && refundBtnEl.parentNode) refundBtnEl.parentNode.removeChild(refundBtnEl);
       return;
     }
 
@@ -760,6 +785,76 @@
       });
     }
 
+    // Refund (api5.docx): 已确认(order_status=1) + 已付款(pay_status=2) + 未发货(shipping_status=0)
+    var shouldRefund =
+      String(order && order.order_status) === "1" &&
+      String(order && order.pay_status) === "2" &&
+      String(order && order.shipping_status) === "0";
+    var refundBtn = null;
+    if (shouldRefund) {
+      refundBtn = document.createElement("span");
+      refundBtn.className = "refund-btn";
+      refundBtn.textContent = "\u9000\u6b3e";
+      refundBtn.style.display = "block";
+      refundBtn.style.cursor = "pointer";
+      refundBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        (async function refundOrder() {
+          if (!order || !order.order_id) {
+            showMsg("\u7f3a\u5c11\u8ba2\u5355ID");
+            return;
+          }
+
+          var ok = true;
+          if ($ && $.showModalConfirm) {
+            ok = await $.showModalConfirm("\u786e\u5b9e\u9700\u8981\u9000\u6b3e\u5417\uff1f", {
+              title: "\u9000\u6b3e\u786e\u8ba4",
+              confirmText: "\u786e\u5b9a\u9000\u6b3e",
+              cancelText: "\u53d6\u6d88",
+              danger: true,
+            });
+          } else {
+            ok = confirm("\u786e\u5b9e\u9700\u8981\u9000\u6b3e\u5417\uff1f");
+          }
+          if (!ok) return;
+
+          var original = refundBtn ? refundBtn.textContent : "";
+          if (refundBtn) {
+            refundBtn.textContent = "\u5904\u7406\u4e2d\u2026";
+            refundBtn.style.pointerEvents = "none";
+            refundBtn.style.opacity = "0.75";
+          }
+          try {
+            var resp = await $.apiPost(
+              "/api/wholesales/orders.php?action=refund",
+              $.withAuth({ order_id: String(order.order_id) })
+            );
+            if (String(resp.code) === "2") {
+              $.clearAuth();
+              showMsg("\u767b\u5f55\u5df2\u5931\u6548\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55", { autoCloseMs: 1200 });
+              location.replace("/login.html");
+              return;
+            }
+            if (String(resp.code) === "0") {
+              showMsg((resp && resp.msg) || "\u9000\u6b3e\u6210\u529f", { autoCloseMs: 2000 });
+              try {
+                load();
+              } catch (e) {}
+            } else {
+              showMsg((resp && resp.msg) || "\u9000\u6b3e\u5931\u8d25", { autoCloseMs: 3000 });
+            }
+          } finally {
+            if (refundBtn) {
+              refundBtn.textContent = original || "\u9000\u6b3e";
+              refundBtn.style.pointerEvents = "";
+              refundBtn.style.opacity = "";
+            }
+          }
+        })();
+      });
+    }
+
     // Place actions into a grid container at the right side of the goods row.
     var actionsWrap = document.createElement("div");
     actionsWrap.className = "order-actions";
@@ -773,6 +868,7 @@
     }
     actionsWrap.appendChild(viewBtn);
     if (payBtn) actionsWrap.appendChild(payBtn);
+    if (refundBtn) actionsWrap.appendChild(refundBtn);
     node.appendChild(actionsWrap);
   }
 

@@ -1,0 +1,360 @@
+/* Responsive layout for /yuanxing/confirm_order/index.html
+   Goal:
+   - "地址选择" (.group_4) and "确认订单信息" (.group_8) stacked in one column.
+   - "批量采购申请明细" (.group_7) as a responsive side panel.
+   - Layout fills the viewport without fixed-width overflow. */
+
+.picai-confirm-order-page .box_1 {
+  position: fixed !important;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.picai-confirm-order-page.page {
+  height: auto !important;
+  min-height: 100vh;
+  overflow: visible !important;
+}
+
+/* Main page area */
+.picai-confirm-order-page .block_9 {
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: calc(100vh - 63px);
+  margin: 0 !important;
+
+  /* 3-column layout:
+     left menu + main column (address + confirm list) + summary panel */
+  display: grid;
+  grid-template-columns: 255px minmax(0, 1fr) minmax(280px, 366px);
+  grid-template-rows: auto 1fr;
+  /* Match goods_list: main content starts at 255(left menu) + 32(gap) = 287px */
+  gap: 32px;
+  padding: 32px 32px 32px 0;
+  /* leave room for fixed top bar */
+  margin-top: 63px !important;
+  box-sizing: border-box;
+  align-items: start;
+}
+
+/* Break the "one huge flex row" into grid children. */
+.picai-confirm-order-page .group_11 {
+  display: contents;
+}
+
+/* Left menu */
+.picai-confirm-order-page .group_3 {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0;
+  /* Keep left menu under the logo (same as goods_list). */
+  position: fixed !important;
+  left: 0;
+  top: 63px;
+  width: 255px !important;
+  height: calc(100vh - 63px) !important;
+  overflow: auto;
+}
+
+/* Address selection panel */
+.picai-confirm-order-page .group_4 {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  min-width: 0;
+}
+
+/* Summary panel ("批量采购申请明细") */
+.picai-confirm-order-page .group_7 {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  min-width: 0;
+  align-self: start;
+}
+
+/* Summary panel inner rows: avoid fixed pixel widths on small screens */
+.picai-confirm-order-page .group_7 .text-wrapper_39,
+.picai-confirm-order-page .group_7 .text-wrapper_40,
+.picai-confirm-order-page .group_7 .text-wrapper_41,
+.picai-confirm-order-page .group_7 .text-wrapper_42 {
+  width: calc(100% - 48px) !important;
+  height: auto !important;
+  box-sizing: border-box;
+}
+
+/* Summary submit button: keep fixed height, but center text to avoid clipping. */
+.picai-confirm-order-page .group_7 .text-wrapper_9 {
+  width: calc(100% - 48px) !important;
+  height: 48px !important;
+  box-sizing: border-box;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Summary submit button: center text to avoid clipping (prototype uses fixed margins). */
+.picai-confirm-order-page .group_7 .text-wrapper_9 .text_30 {
+  margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  line-height: 16px !important;
+  white-space: nowrap;
+}
+
+/* Confirm list panel ("确认订单信息") */
+.picai-confirm-order-page .group_8 {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  min-width: 0;
+  overflow: visible !important;
+}
+
+/* Address cards: wrap on narrower widths */
+.picai-confirm-order-page .group_12,
+.picai-confirm-order-page .list_4 {
+  width: calc(100% - 48px) !important;
+  height: auto !important;
+  margin-left: 24px !important;
+  margin-right: 24px !important;
+  box-sizing: border-box;
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: flex-start !important;
+}
+
+.picai-confirm-order-page .group_5,
+.picai-confirm-order-page .text-wrapper_2,
+.picai-confirm-order-page .group_6 {
+  width: auto !important;
+  flex: 1 1 320px;
+  max-width: 377px;
+  min-width: 260px;
+  margin: 0 !important;
+}
+
+.picai-confirm-order-page .group_12 .group_5 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.picai-confirm-order-page .group_12 .group_5 .thumbnail_5,
+.picai-confirm-order-page .group_12 .group_5 .text_11 {
+  margin: 0 !important;
+}
+
+.picai-confirm-order-page .group_12 .text-wrapper_2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.picai-confirm-order-page .group_12 .text-wrapper_2 .text_12 {
+  margin: 0 !important;
+}
+
+.picai-confirm-order-page .group_6 .block_5 {
+  width: 100% !important;
+}
+
+.picai-confirm-order-page .group_6 .text-wrapper_37,
+.picai-confirm-order-page .group_6 .text_15,
+.picai-confirm-order-page .group_6 .text_16 {
+  width: auto !important;
+  max-width: 100%;
+}
+
+/* Address list cards: match "新增地址" card width and allow shrinking/wrapping */
+.picai-confirm-order-page .list_4 [class^="list-items_1-"] {
+  width: auto !important;
+  flex: 1 1 320px;
+  max-width: 377px;
+  min-width: 260px;
+  margin: 0 !important;
+}
+
+.picai-confirm-order-page .list_4 [class^="list-items_1-"] [class^="text-wrapper_38-"],
+.picai-confirm-order-page .list_4 [class^="list-items_1-"] [class^="text-group_15-"] {
+  width: auto !important;
+  max-width: 100%;
+}
+
+.picai-confirm-order-page .list_4 [class^="list-items_1-"] [class^="text_20-"] {
+  width: auto !important;
+  max-width: 100%;
+}
+
+/* Confirm order header row: use grid instead of hardcoded margins */
+.picai-confirm-order-page #picaiConfirmTableHead {
+  width: calc(100% - 48px) !important;
+  margin-left: 24px !important;
+  margin-right: 24px !important;
+  box-sizing: border-box;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 160px 120px;
+  column-gap: 16px;
+}
+
+.picai-confirm-order-page #picaiConfirmTableHead .picai-confirm-head-info,
+.picai-confirm-order-page #picaiConfirmTableHead .picai-confirm-head-priceqty,
+.picai-confirm-order-page #picaiConfirmTableHead .picai-confirm-head-subtotal {
+  width: auto !important;
+  margin: 0 !important;
+  min-width: 0;
+}
+
+.picai-confirm-order-page #picaiConfirmTableHead .picai-confirm-head-priceqty,
+.picai-confirm-order-page #picaiConfirmTableHead .picai-confirm-head-subtotal {
+  justify-self: end;
+  text-align: right;
+}
+
+/* Shop header rows */
+.picai-confirm-order-page .box_5,
+.picai-confirm-order-page .box_8 {
+  width: calc(100% - 48px) !important;
+  margin-left: 24px !important;
+  margin-right: 24px !important;
+  box-sizing: border-box;
+}
+
+.picai-confirm-order-page .image-text_16,
+.picai-confirm-order-page .image-text_19 {
+  width: auto !important;
+  margin: 11px 24px 0 24px !important;
+}
+
+/* Item rows: 3-column grid (info / price&qty / subtotal) */
+.picai-confirm-order-page .box_6,
+.picai-confirm-order-page .box_15,
+.picai-confirm-order-page .box_16 {
+  width: calc(100% - 48px) !important;
+  margin: 16px 24px 0 24px !important;
+  box-sizing: border-box;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 160px 120px;
+  column-gap: 16px;
+  align-items: start;
+}
+
+.picai-confirm-order-page .image-text_17,
+.picai-confirm-order-page .image-text_18,
+.picai-confirm-order-page .image-text_20 {
+  width: auto !important;
+  min-width: 0;
+}
+
+.picai-confirm-order-page .text-wrapper_43,
+.picai-confirm-order-page .text-wrapper_44,
+.picai-confirm-order-page .text-wrapper_45 {
+  margin: 8px 0 0 0 !important;
+  justify-self: end;
+  text-align: right;
+}
+
+.picai-confirm-order-page .text_38,
+.picai-confirm-order-page .text_45,
+.picai-confirm-order-page .text_52 {
+  margin: 8px 0 0 0 !important;
+  justify-self: end;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Make product text blocks shrink/wrap instead of pushing layout */
+.picai-confirm-order-page .text-group_16,
+.picai-confirm-order-page .text-group_17,
+.picai-confirm-order-page .text-group_18 {
+  width: auto !important;
+  min-width: 0;
+}
+
+.picai-confirm-order-page .text_33,
+.picai-confirm-order-page .text_34,
+.picai-confirm-order-page .text_40,
+.picai-confirm-order-page .text_41,
+.picai-confirm-order-page .text_47,
+.picai-confirm-order-page .text_48 {
+  width: auto !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 1024px) {
+  /* Hide left menu like other pages; keep main + summary side-by-side */
+  .picai-confirm-order-page .block_9 {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+    grid-template-rows: auto 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .picai-confirm-order-page .group_3 {
+    display: none;
+  }
+
+  .picai-confirm-order-page .group_4 {
+    grid-column: 1;
+  }
+
+  .picai-confirm-order-page .group_8 {
+    grid-column: 1;
+  }
+
+  .picai-confirm-order-page .group_7 {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Stack summary below on small screens */
+  .picai-confirm-order-page .block_9 {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+
+  .picai-confirm-order-page .group_7 {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .picai-confirm-order-page #picaiConfirmTableHead,
+  .picai-confirm-order-page .box_5,
+  .picai-confirm-order-page .box_8,
+  .picai-confirm-order-page .box_6,
+  .picai-confirm-order-page .box_15,
+  .picai-confirm-order-page .box_16,
+  .picai-confirm-order-page .group_12,
+  .picai-confirm-order-page .list_4 {
+    width: calc(100% - 32px) !important;
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+  }
+
+  .picai-confirm-order-page #picaiConfirmTableHead,
+  .picai-confirm-order-page .box_6,
+  .picai-confirm-order-page .box_15,
+  .picai-confirm-order-page .box_16 {
+    grid-template-columns: minmax(0, 1fr) 120px 100px;
+    column-gap: 12px;
+  }
+}

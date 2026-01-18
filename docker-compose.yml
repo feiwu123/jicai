@@ -8,5 +8,5 @@ services:
       PICAI_PORT: 8000
       TOPM_BASE: ${TOPM_BASE:-https://topm.tech}
     ports:
-      - "${PICAI_HTTP_PORT:-8000}:8000"
+      - "${PICAI_HTTP_PORT:-1512}:8000"
     restart: unless-stopped

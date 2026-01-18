@@ -1,0 +1,316 @@
+/* Responsive layout for /yuanxing/cart/index.html
+   Goal: cart content remains visible on different screen sizes (no fixed-width overflow). */
+
+/* Match goods_list: fixed top bar + left menu under logo. */
+.picai-cart-page .box_1 {
+  position: fixed !important;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+/* Allow page to grow and scroll (prototype uses fixed heights + overflow hidden). */
+.picai-cart-page.page {
+  height: auto !important;
+  min-height: 100vh;
+  overflow: visible !important;
+}
+
+.picai-cart-page .group_63 {
+  height: auto !important;
+  min-height: calc(100vh - 63px);
+  /* Desktop layout: sidebar + cart list + summary (same row). */
+  display: grid;
+  grid-template-columns: 255px minmax(0, 1fr) minmax(280px, 366px);
+  gap: 24px;
+  /* Keep sidebar flush left under logo; keep main content padded on other sides. */
+  padding: 32px 32px 32px 0;
+  /* Offset for fixed top bar. */
+  margin-top: 63px;
+  box-sizing: border-box;
+}
+
+/* Let .section_1 / .section_2 participate as direct grid items. */
+.picai-cart-page .block_14 {
+  display: contents;
+}
+
+.picai-cart-page .section_1 {
+  grid-column: 1;
+  grid-row: 1;
+  width: auto !important;
+  height: auto !important;
+  align-self: start;
+  position: fixed !important;
+  left: 0;
+  top: 63px;
+  width: 255px !important;
+  height: calc(100vh - 63px) !important;
+  overflow: auto;
+}
+
+.picai-cart-page .section_2 {
+  grid-column: 3;
+  grid-row: 1;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  max-width: none;
+  align-self: start;
+}
+
+/* Cart list panel */
+.picai-cart-page .group_8 {
+  grid-column: 2;
+  grid-row: 1;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0;
+  align-self: start;
+}
+
+/* Header row (column labels) */
+.picai-cart-page .group_9,
+.picai-cart-page .group_10 {
+  width: calc(100% - 48px) !important;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.picai-cart-page .group_9 {
+  margin-left: 24px;
+}
+
+.picai-cart-page .group_10 {
+  display: grid !important;
+  grid-template-columns:
+    minmax(0, 18px) /* checkbox */
+    minmax(0, 1fr) /* goods */
+    minmax(0, 120px) /* price */
+    minmax(0, 90px) /* stock */
+    minmax(0, 32px) /* minus */
+    minmax(0, 48px) /* qty */
+    minmax(0, 32px) /* plus */
+    minmax(0, 70px); /* op */
+  column-gap: 12px;
+  align-items: center;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.picai-cart-page .group_10 > * {
+  margin: 0 !important;
+  width: auto !important;
+  min-width: 0;
+}
+
+/* Map the 5 header labels onto the 8-column grid. */
+.picai-cart-page .group_10 .group_11 {
+  grid-column: 1;
+}
+.picai-cart-page .group_10 .text_31 {
+  grid-column: 2;
+}
+.picai-cart-page .group_10 .text_32 {
+  grid-column: 3;
+  justify-self: end;
+  text-align: right;
+}
+.picai-cart-page .group_10 .text_33 {
+  grid-column: 4;
+  justify-self: end;
+  text-align: right;
+}
+.picai-cart-page .group_10 .text_34 {
+  grid-column: 5 / 8;
+  justify-self: center;
+  text-align: center;
+}
+.picai-cart-page .group_10 .text_35 {
+  grid-column: 8;
+  justify-self: center;
+  text-align: center;
+}
+
+/* Shop header row */
+.picai-cart-page .group_12 {
+  width: 100% !important;
+  margin-top: 16px !important;
+}
+
+.picai-cart-page .group_64 {
+  width: calc(100% - 48px) !important;
+  max-width: 100%;
+  margin-left: 24px !important;
+}
+
+/* Item row */
+.picai-cart-page .group_65 {
+  width: calc(100% - 48px) !important;
+  max-width: 100%;
+  margin-left: 24px !important;
+  margin-right: 24px !important;
+  box-sizing: border-box;
+  display: grid !important;
+  grid-template-columns:
+    minmax(0, 18px) /* checkbox */
+    minmax(0, 40px) /* img */
+    minmax(0, 1fr) /* goods info */
+    minmax(0, 120px) /* price */
+    minmax(0, 90px) /* stock */
+    minmax(0, 32px) /* minus */
+    minmax(0, 48px) /* qty */
+    minmax(0, 32px) /* plus */
+    minmax(0, 70px); /* delete */
+  column-gap: 12px;
+  align-items: center;
+  padding: 6px 24px;
+}
+
+.picai-cart-page .group_65 > * {
+  margin: 0 !important;
+  min-width: 0;
+}
+
+.picai-cart-page .group_65 .block_1 {
+  grid-column: 1;
+}
+.picai-cart-page .group_65 img.label_3 {
+  grid-column: 2;
+}
+.picai-cart-page .group_65 .text-wrapper_36 {
+  grid-column: 3;
+  width: auto !important;
+}
+.picai-cart-page .group_65 .text_39 {
+  grid-column: 4;
+  justify-self: end;
+  text-align: right;
+  white-space: nowrap;
+}
+.picai-cart-page .group_65 .text_40 {
+  grid-column: 5;
+  justify-self: end;
+  text-align: right;
+  white-space: nowrap;
+}
+.picai-cart-page .group_65 .image-wrapper_1 {
+  grid-column: 6;
+  justify-self: center;
+  width: 32px;
+  margin: 0 !important;
+}
+.picai-cart-page .group_65 .block_2 {
+  grid-column: 7;
+  justify-self: center;
+  width: 48px;
+  margin: 0 !important;
+}
+.picai-cart-page .group_65 .image-wrapper_2 {
+  grid-column: 8;
+  justify-self: center;
+  width: 32px;
+  margin: 0 !important;
+}
+.picai-cart-page .group_65 .text_41 {
+  grid-column: 9;
+  justify-self: center;
+  margin: 0 !important;
+}
+
+/* Let names wrap if needed; keep SKU readable. */
+.picai-cart-page .group_65 .text_37 {
+  width: auto !important;
+  max-width: 100%;
+}
+.picai-cart-page .group_65 .text_38 {
+  width: auto !important;
+  max-width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .picai-cart-page .group_63 {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+    grid-template-rows: auto;
+    gap: 12px;
+    padding: 16px;
+    margin-top: 63px;
+  }
+
+  .picai-cart-page .section_1 {
+    display: none;
+  }
+
+  .picai-cart-page .section_2 {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .picai-cart-page .group_8 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .picai-cart-page .group_63 {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .picai-cart-page .section_2 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .picai-cart-page .group_8 {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .picai-cart-page .group_10 {
+    column-gap: 8px;
+    padding: 0 16px;
+    grid-template-columns:
+      minmax(0, 18px)
+      minmax(0, 1fr)
+      minmax(0, 90px)
+      minmax(0, 70px)
+      minmax(0, 28px)
+      minmax(0, 44px)
+      minmax(0, 28px)
+      minmax(0, 56px);
+  }
+
+  .picai-cart-page .group_9 {
+    margin-left: 16px;
+  }
+
+  .picai-cart-page .group_9,
+  .picai-cart-page .group_10,
+  .picai-cart-page .group_64,
+  .picai-cart-page .group_65 {
+    width: calc(100% - 32px) !important;
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+  }
+
+  .picai-cart-page .group_65 {
+    padding: 6px 16px;
+    column-gap: 8px;
+    grid-template-columns:
+      minmax(0, 18px)
+      minmax(0, 40px)
+      minmax(0, 1fr)
+      minmax(0, 90px)
+      minmax(0, 70px)
+      minmax(0, 28px)
+      minmax(0, 44px)
+      minmax(0, 28px)
+      minmax(0, 56px);
+  }
+}

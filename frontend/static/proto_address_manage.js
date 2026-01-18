@@ -14,7 +14,7 @@
   makeNavClick(document.querySelector("[data-nav='goods_list']"), "/yuanxing/goods_list/index.html");
   makeNavClick(document.querySelector("[data-nav='orders_list']"), "/yuanxing/orders_list/index.html");
   // Top-right icon (same role as goods_list cart icon)
-  makeNavClick(document.querySelector(".box_3"), "/yuanxing/cart/index.html");
+  makeNavClick(document.querySelector(".box_3") || document.querySelector(".header-cart") || document.querySelector(".cart-icon"), "/yuanxing/cart/index.html");
 
   // Avatar-side settings icon -> logout dropdown
   try {

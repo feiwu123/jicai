@@ -318,6 +318,7 @@
       details.forEach(function (it, idx) {
         var time = (it && (it.scanTime || it.scan_time || it.time)) || "";
         var desc = (it && (it.desc || it.description || it.context)) || "";
+        var sigPicUrl = (it && (it.sigPicUrl || it.sig_pic_url)) || "";
 
         var row = document.createElement("div");
         row.className = "picai-trace-item" + (idx === 0 ? " picai-trace-item--first" : "");
@@ -329,6 +330,24 @@
         var d = document.createElement("div");
         d.className = "picai-trace-desc";
         d.textContent = String(desc || "");
+
+        // If the API provides a signature picture URL, append a "查看" link after the time.
+        try {
+          var u = String(sigPicUrl || "").trim();
+          if (u && !/^javascript:/i.test(u)) {
+            try {
+              u = String(new URL(u, location.href));
+            } catch (e) {}
+            var a = document.createElement("a");
+            a.className = "picai-sig-link";
+            a.textContent = "查看";
+            a.href = u;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            t.appendChild(document.createTextNode(" "));
+            t.appendChild(a);
+          }
+        } catch (e) {}
 
         row.appendChild(t);
         row.appendChild(d);
@@ -371,7 +390,6 @@
         totalAmount += lineTotal;
 
         var fullName = safeText(g.goods_name || "--");
-        var shortName = truncateText(fullName, 20);
 
         var tr = document.createElement("tr");
 
@@ -379,7 +397,7 @@
         tdName.className = "col-name";
         var nameSpan = document.createElement("span");
         nameSpan.className = "picai-goods-name";
-        nameSpan.textContent = shortName;
+        nameSpan.textContent = fullName;
         nameSpan.title = fullName;
         tdName.appendChild(nameSpan);
         if (qty) {
