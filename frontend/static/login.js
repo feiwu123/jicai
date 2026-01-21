@@ -22,11 +22,12 @@
   }
 
   function getReturn() {
+    var fallback = $.toUrl ? $.toUrl("/yuanxing/goods_list/index.html") : "/yuanxing/goods_list/index.html";
     try {
       var u = new URL(location.href);
-      return u.searchParams.get("return") || "/yuanxing/goods_list/index.html";
+      return u.searchParams.get("return") || fallback;
     } catch (e) {
-      return "/yuanxing/goods_list/index.html";
+      return fallback;
     }
   }
 

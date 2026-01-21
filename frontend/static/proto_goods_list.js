@@ -7,7 +7,8 @@
     if (!el) return;
     el.style.cursor = "pointer";
     el.addEventListener("click", function () {
-      location.href = href;
+      var target = $.toUrl ? $.toUrl(href) : href;
+      location.href = target;
     });
   }
 
@@ -158,7 +159,7 @@
     if (String(resp.code) === "2") {
       $.clearAuth();
       showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-      location.replace("/login.html");
+      location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
       return [];
     }
     if (String(resp.code) !== "0") {
@@ -331,7 +332,7 @@
       if (String(resp.code) === "2") {
         $.clearAuth();
         showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-        location.replace("/login.html");
+        location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
         return keys;
       }
       if (String(resp.code) !== "0") {
@@ -504,7 +505,7 @@
       if (pager) area.insertBefore(existing, pager);
       else area.appendChild(existing);
     }
-    existing.textContent = String(text || "没有数据");
+    existing.textContent = String(text || "暂时没有数据");
   }
 
   function removeEmpty(tpl) {
@@ -587,7 +588,10 @@
       var stock = row.querySelector("span.text_24");
       if (stock) stock.textContent = goods.goods_number || "0";
       var price = row.querySelector("span.text_25");
-      if (price) price.textContent = goods.formated_shop_price || goods.shop_price || "";
+      if (price) {
+        var rawPrice = goods.formated_shop_price || goods.shop_price || "";
+        price.textContent = $.formatMoneyMXN ? $.formatMoneyMXN(rawPrice) : rawPrice;
+      }
       var length = row.querySelector("span.text_26");
       if (length) length.textContent = goods.length || "";
       var width = row.querySelector("span.text_27");
@@ -661,7 +665,7 @@
           } else if (String(resp.code) === "2") {
             $.clearAuth();
             $.showModalMessage("登录已失效，请重新登录", { autoCloseMs: 900 });
-            location.replace("/login.html");
+            location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
           } else {
             $.showModalMessage((resp && resp.msg) || "加入失败");
           }
@@ -677,7 +681,7 @@
     var tpl = parseTemplate(area);
     if (!tpl) return;
     clearRows(tpl);
-    ensureEmpty(tpl, "正在加载数据…");
+    ensureEmpty(tpl, "暂时没有数据");
     renderPagination(area);
 
     var cartKeys = await getCartKeys();
@@ -689,7 +693,7 @@
     if (String(resp.code) === "2") {
       $.clearAuth();
       showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-      location.replace("/login.html");
+      location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
       return;
     }
     if (String(resp.code) !== "0") {
@@ -710,7 +714,7 @@
 
     clearRows(tpl);
     if (!list.length) {
-      ensureEmpty(tpl, "没有数据");
+      ensureEmpty(tpl, "暂时没有数据");
       renderPagination(area);
       return;
     }

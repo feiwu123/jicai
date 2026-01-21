@@ -225,6 +225,7 @@
 .picai-confirm-order-page #picaiConfirmTableHead .picai-confirm-head-subtotal {
   justify-self: end;
   text-align: right;
+  padding-right: 12px;
 }
 
 /* Shop header rows */
@@ -260,6 +261,20 @@
 .picai-confirm-order-page .image-text_20 {
   width: auto !important;
   min-width: 0;
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-start !important;
+}
+
+.picai-confirm-order-page .image-text_17 img,
+.picai-confirm-order-page .image-text_18 img,
+.picai-confirm-order-page .image-text_20 img {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 6px;
+  object-fit: cover;
+  flex: 0 0 auto;
 }
 
 .picai-confirm-order-page .text-wrapper_43,
@@ -268,6 +283,7 @@
   margin: 8px 0 0 0 !important;
   justify-self: end;
   text-align: right;
+  padding-right: 12px;
 }
 
 .picai-confirm-order-page .text_38,
@@ -277,6 +293,7 @@
   justify-self: end;
   text-align: right;
   white-space: nowrap;
+  padding-right: 12px;
 }
 
 /* Make product text blocks shrink/wrap instead of pushing layout */
@@ -285,6 +302,10 @@
 .picai-confirm-order-page .text-group_18 {
   width: auto !important;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: auto !important;
 }
 
 .picai-confirm-order-page .text_33,
@@ -294,9 +315,55 @@
 .picai-confirm-order-page .text_47,
 .picai-confirm-order-page .text_48 {
   width: auto !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+.picai-confirm-order-page .text_32,
+.picai-confirm-order-page .text_39,
+.picai-confirm-order-page .text_46 {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+.picai-confirm-order-page .text_33,
+.picai-confirm-order-page .text_40,
+.picai-confirm-order-page .text_47 {
+  color: rgba(100, 116, 139, 1);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.picai-confirm-order-page .text_34,
+.picai-confirm-order-page .text_41,
+.picai-confirm-order-page .text_48 {
+  display: none !important;
+}
+
+.picai-confirm-order-page .text-wrapper_10,
+.picai-confirm-order-page .text-wrapper_12,
+.picai-confirm-order-page .text-wrapper_14 {
+  display: none !important;
+}
+
+.picai-confirm-order-page .shop-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.picai-confirm-order-page .shop-name-wrap img {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #f2f3f7;
 }
 
 @media (max-width: 1024px) {

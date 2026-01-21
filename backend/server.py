@@ -20,6 +20,13 @@ _ROOT = _HERE.parent
 _FRONTEND_DIR = _ROOT / "frontend"
 _DEFAULT_INDEX = _FRONTEND_DIR / "index.html"
 _API_ORIGIN = os.getenv("PICAI_API_ORIGIN") or os.getenv("TOPM_BASE") or "https://topm.tech"
+_BASE_PATH = (os.getenv("PICAI_BASE_PATH") or "").strip()
+if _BASE_PATH and not _BASE_PATH.startswith("/"):
+    _BASE_PATH = "/" + _BASE_PATH
+if _BASE_PATH == "/":
+    _BASE_PATH = ""
+if _BASE_PATH.endswith("/") and _BASE_PATH:
+    _BASE_PATH = _BASE_PATH.rstrip("/")
 
 
 def _safe_join(root: Path, url_path: str) -> Path | None:
@@ -47,6 +54,16 @@ def _read_body(handler: BaseHTTPRequestHandler) -> bytes:
     return handler.rfile.read(n) if n > 0 else b""
 
 
+def _strip_base(path: str) -> str:
+    if not _BASE_PATH:
+        return path
+    if path == _BASE_PATH:
+        return "/"
+    if path.startswith(_BASE_PATH + "/"):
+        return path[len(_BASE_PATH) :]
+    return path
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "picai/0.1"
 
@@ -70,17 +87,22 @@ class Handler(BaseHTTPRequestHandler):
     def _dispatch(self) -> None:
         try:
             parsed = urllib.parse.urlsplit(self.path)
-            path = parsed.path or "/"
+            raw_path = parsed.path or "/"
+            path = _strip_base(raw_path)
 
             if path == "/health":
                 self._send_text(HTTPStatus.OK, "ok")
                 return
 
             if path.startswith("/api/wholesales/"):
-                self._proxy_to_upstream()
+                self._proxy_to_upstream(path, parsed.query)
                 return
 
-            self._serve_static()
+            if (self._should_block_yuanxing(path) or self._should_block_yuanxing(raw_path)) and not self._has_auth_cookie():
+                self._redirect_to_login(raw_path, parsed.query)
+                return
+
+            self._serve_static(path)
         except Exception:
             traceback.print_exc()
             self._send_json(
@@ -88,10 +110,9 @@ class Handler(BaseHTTPRequestHandler):
                 {"code": "1", "msg": "internal_error", "detail": "See server logs for traceback."},
             )
 
-    def _serve_static(self) -> None:
-        parsed = urllib.parse.urlsplit(self.path)
+    def _serve_static(self, url_path: str) -> None:
         # Browsers percent-encode non-ASCII paths; decode so Chinese filenames resolve on disk.
-        path = urllib.parse.unquote(parsed.path or "/")
+        path = urllib.parse.unquote(url_path or "/")
 
         if path == "/":
             if _DEFAULT_INDEX.exists():
@@ -118,6 +139,64 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         self._send_file(local_path)
+
+    def _should_block_yuanxing(self, path: str) -> bool:
+        if not path:
+            return False
+        # Match yuanxing segment even when the app is mounted under a prefix.
+        if "/yuanxing" not in path:
+            return False
+        if "/yuanxing/" not in path and not path.endswith("/yuanxing"):
+            return False
+
+        if path.endswith("/yuanxing"):
+            return True
+        if path.endswith("/") or path.endswith(".html"):
+            return True
+        last = path.rsplit("/", 1)[-1]
+        if "." not in last:
+            return True
+        return False
+
+    def _has_auth_cookie(self) -> bool:
+        cookie = self.headers.get("Cookie") or ""
+        for part in cookie.split(";"):
+            part = part.strip()
+            if not part:
+                continue
+            name, _, value = part.partition("=")
+            if name == "picai_token" and value:
+                return True
+        return False
+
+    def _redirect_to_login(self, raw_path: str, query: str) -> None:
+        return_path = raw_path
+        if query:
+            return_path = f"{return_path}?{query}"
+        ret = urllib.parse.quote(return_path, safe="")
+        login_path = "/login.html"
+        base = _BASE_PATH or ""
+        if not base:
+            base = self._infer_base_from_raw(raw_path)
+        if base:
+            login_path = f"{base}{login_path}"
+        location = f"{login_path}?return={ret}"
+        self.send_response(HTTPStatus.FOUND)
+        self.send_header("Location", location)
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+
+    def _infer_base_from_raw(self, raw_path: str) -> str:
+        if not raw_path:
+            return ""
+        marker = "/yuanxing"
+        idx = raw_path.find(marker)
+        if idx <= 0:
+            return ""
+        base = raw_path[:idx]
+        if base.endswith("/"):
+            base = base.rstrip("/")
+        return base
 
     def _send_file(self, path: Path) -> None:
         ctype, _enc = mimetypes.guess_type(str(path))
@@ -149,10 +228,9 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
-    def _proxy_to_upstream(self) -> None:
-        parsed = urllib.parse.urlsplit(self.path)
+    def _proxy_to_upstream(self, path: str, query: str) -> None:
         upstream_url = urllib.parse.urlunsplit(
-            (urllib.parse.urlsplit(_API_ORIGIN).scheme, urllib.parse.urlsplit(_API_ORIGIN).netloc, parsed.path, parsed.query, "")
+            (urllib.parse.urlsplit(_API_ORIGIN).scheme, urllib.parse.urlsplit(_API_ORIGIN).netloc, path, query, "")
         )
 
         body = _read_body(self)

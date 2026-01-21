@@ -6,18 +6,25 @@
     <title>批采系统</title>
   </head>
   <body>
+    <script src="static/api.js"></script>
     <script>
       (function () {
+        var toUrl = function (path) {
+          try {
+            if (window.picai && typeof window.picai.toUrl === "function") return window.picai.toUrl(path);
+          } catch (e) {}
+          return path;
+        };
         try {
           var user = localStorage.getItem("picai_user");
           var token = localStorage.getItem("picai_token");
           if (user && token) {
-            location.replace("./yuanxing/goods_list/index.html");
+            location.replace(toUrl("/yuanxing/goods_list/index.html"));
           } else {
-            location.replace("./login.html");
+            location.replace(toUrl("/login.html"));
           }
         } catch (e) {
-          location.replace("./login.html");
+          location.replace(toUrl("/login.html"));
         }
       })();
     </script>

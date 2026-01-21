@@ -30,13 +30,14 @@
     if (!el) return;
     el.style.cursor = "pointer";
     el.addEventListener("click", function () {
+      var target = $.toUrl ? $.toUrl(href) : href;
       try {
         if (window.top && window.top !== window) {
-          window.top.location.href = href;
+          window.top.location.href = target;
           return;
         }
       } catch (e) {}
-      location.href = href;
+      location.href = target;
     });
   }
 
@@ -241,7 +242,7 @@
     var modal = document.createElement("div");
     modal.id = "picaiLogisticsModal";
     modal.className = "picai-logistics-modal";
-    modal.innerHTML =
+    var html =
       "" +
       '<div class="group_13 flex-col" role="dialog" aria-modal="true" aria-label="物流轨迹">' +
       '<div class="picai-logistics-body flex-col">' +
@@ -260,6 +261,7 @@
       '<div class="picai-trace-list" id="picaiTraceList"></div>' +
       "</div>" +
       "</div>";
+    modal.innerHTML = $.fixHtmlPaths ? $.fixHtmlPaths(html) : html;
 
     modal.addEventListener("click", function () {
       hideLogisticsModal();
@@ -329,7 +331,7 @@
         if (String(resp.code) === "2") {
           $.clearAuth();
           showMsg("登录已失效，请重新登录", { autoCloseMs: 1200 });
-          location.replace("/login.html");
+          location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
           return;
         }
         if (String(resp.code) !== "0") {
@@ -351,7 +353,13 @@
         details.forEach(function (it, idx) {
           var time = (it && (it.scanTime || it.scan_time || it.time)) || "";
           var desc = (it && (it.desc || it.description || it.context)) || "";
-          var sigPicUrl = (it && (it.sigPicUrl || it.sig_pic_url)) || "";
+          var sigPicUrl =
+            (it &&
+              (it.electronicSignaturePicUrl ||
+                it.electronic_signature_pic_url ||
+                it.sigPicUrl ||
+                it.sig_pic_url)) ||
+            "";
 
           var row = document.createElement("div");
           row.className = "picai-trace-item" + (idx === 0 ? " picai-trace-item--first" : "");
@@ -436,7 +444,7 @@
       existing.style.letterSpacing = "0.2px";
       area.appendChild(existing);
     }
-    existing.textContent = String(text || "\u6ca1\u6709\u8ba2\u5355");
+    existing.textContent = String(text || "暂时没有数据");
     if (titleEl && titleEl.parentNode !== area) area.insertBefore(titleEl, existing);
   }
 
@@ -668,7 +676,10 @@
     if (line3) line3.textContent = "";
 
     var price = node.querySelector("span.text_25");
-    if (price) price.textContent = g.goods_price || "";
+    if (price) {
+      var rawPrice = g.goods_price || "";
+      price.textContent = $.formatMoneyMXN ? $.formatMoneyMXN(rawPrice) : rawPrice;
+    }
     var qty = node.querySelector("span.text_26");
     if (qty) qty.textContent = "×" + (g.goods_number || "1");
 
@@ -676,7 +687,8 @@
     if (total) {
       var p = parseFloat(g.goods_price || "0");
       var n = parseInt(g.goods_number || "1", 10) || 1;
-      total.textContent = isFinite(p) ? String((p * n).toFixed(2)) : "";
+      var totalRaw = isFinite(p) ? String((p * n).toFixed(2)) : "";
+      total.textContent = $.formatMoneyMXN ? $.formatMoneyMXN(totalRaw, { fallback: totalRaw }) : totalRaw;
     }
 
     var existingActions = node.querySelector(".order-actions");
@@ -730,7 +742,8 @@
         showMsg("缺少订单ID");
         return;
       }
-      location.href = "/yuanxing/lanhu_dingdanxiangqing/index.html?order_id=" + encodeURIComponent(String(order.order_id));
+      var baseUrl = $.toUrl ? $.toUrl("/yuanxing/lanhu_dingdanxiangqing/index.html") : "/yuanxing/lanhu_dingdanxiangqing/index.html";
+      location.href = baseUrl + "?order_id=" + encodeURIComponent(String(order.order_id));
     });
 
     // Add "立即支付" when order_status==1 && pay_status==0 && review_status==1
@@ -766,7 +779,7 @@
             if (String(resp.code) === "2") {
               $.clearAuth();
               showMsg("登录已失效，请重新登录", { autoCloseMs: 1200 });
-              location.replace("/login.html");
+              location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
               return;
             }
             if (String(resp.code) === "0") {
@@ -833,7 +846,7 @@
             if (String(resp.code) === "2") {
               $.clearAuth();
               showMsg("\u767b\u5f55\u5df2\u5931\u6548\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55", { autoCloseMs: 1200 });
-              location.replace("/login.html");
+              location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
               return;
             }
             if (String(resp.code) === "0") {
@@ -899,7 +912,7 @@
     var titleEl = tpl.title;
     clearArea(area, titleEl);
     if (titleEl && titleEl.parentNode !== area) area.appendChild(titleEl);
-    ensureEmpty(area, titleEl, "\u52a0\u8f7d\u4e2d\u2026");
+    ensureEmpty(area, titleEl, "暂时没有数据");
     renderPagination(area);
 
     var resp = await $.apiPost(
@@ -909,7 +922,7 @@
     if (String(resp.code) === "2") {
       $.clearAuth();
       alert("登录已失效，请重新登录");
-      location.replace("/login.html");
+      location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
       return;
     }
     if (String(resp.code) !== "0") {
@@ -945,7 +958,7 @@
     if (titleEl && titleEl.parentNode !== area) area.appendChild(titleEl);
 
     if (!orders.length) {
-      ensureEmpty(area, titleEl, "\u6ca1\u6709\u8ba2\u5355");
+      ensureEmpty(area, titleEl, "暂时没有数据");
       renderPagination(area);
       return;
     }

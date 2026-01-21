@@ -24,7 +24,7 @@
       "#picaiCartBulkDeleteBtn{height:32px;padding:0 12px;border:1px solid rgba(226,232,240,1);background:#fff;border-radius:8px;cursor:pointer;color:rgba(232,69,122,1);font-size:12px;font-weight:600}" +
       "#picaiCartBulkDeleteBtn:disabled{opacity:0.6;cursor:default}" +
       ".picai-shop-collapse{width:20px;height:20px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;border-radius:6px;color:rgba(84,98,116,1);cursor:pointer;user-select:none;transition:transform .15s ease;transform-origin:center;font-size:20px;line-height:20px}" +
-      ".picai-cart-shop.picai-collapsed .picai-cart-item-row{display:none}";
+      ".picai-cart-shop.picai-collapsed .picai-cart-item-row{display:none !important}";
     document.head.appendChild(style);
   }
 
@@ -283,10 +283,14 @@
       return v !== undefined && v !== null && String(v) !== "";
     }
 
+    function formatAmountText(v) {
+      var text = !loading && summary && hasValue(v) ? String(v) : String(placeholder);
+      return $.formatMoneyMXN ? $.formatMoneyMXN(text, { fallback: text }) : text;
+    }
+
     var goodsAmountEl = document.querySelector("span.text_12");
     if (goodsAmountEl) {
-      goodsAmountEl.textContent =
-        !loading && summary && hasValue(summary.goods_amount) ? String(summary.goods_amount) : String(placeholder);
+      goodsAmountEl.textContent = formatAmountText(summary && summary.goods_amount);
     }
     var goodsNumEl = document.querySelector("span.text_14");
     if (goodsNumEl) {
@@ -298,8 +302,7 @@
     }
     var totalEl = document.querySelector("span.text_18");
     if (totalEl) {
-      totalEl.textContent =
-        !loading && summary && hasValue(summary.goods_amount) ? String(summary.goods_amount) : String(placeholder);
+      totalEl.textContent = formatAmountText(summary && summary.goods_amount);
     }
   }
 
@@ -557,7 +560,10 @@
     }
     if (sku) sku.textContent = "SKU:" + (item.goods_sn || "");
     var price = row.querySelector("span.text_39");
-    if (price) price.textContent = item.goods_price || "";
+    if (price) {
+      var rawPrice = (item && item.goods_price) || "";
+      price.textContent = $.formatMoneyMXN ? $.formatMoneyMXN(rawPrice) : rawPrice;
+    }
     var stock = row.querySelector("span.text_40");
     if (stock) stock.textContent = item.stock || item.goods_number || "";
 
@@ -651,7 +657,7 @@
     clearArea(area);
     state.qtyEdits = {};
     var loading = document.createElement("div");
-    loading.textContent = "加载中...";
+    loading.textContent = "暂时没有数据";
     loading.style.padding = "16px";
     loading.style.width = "100%";
     loading.style.height = "240px";
@@ -700,7 +706,36 @@
       var shopHeader = tpl.shopHeader.cloneNode(true);
       if (idx > 0) shopHeader.style.marginTop = "16px";
       var shopNameEl = shopHeader.querySelector("span.text_36");
-      if (shopNameEl) shopNameEl.textContent = shop.shop_name || "店铺";
+      if (shopNameEl) {
+        var shopName = shop.shop_name || "店铺";
+        var logoUrl = shop && shop.shop_logo ? String(shop.shop_logo).trim() : "";
+        if (logoUrl) {
+          var resolvedLogo = $.toUrl ? $.toUrl(logoUrl) : logoUrl;
+          shopNameEl.textContent = "";
+          shopNameEl.style.display = "flex";
+          shopNameEl.style.alignItems = "center";
+          shopNameEl.style.gap = "8px";
+
+          var logo = document.createElement("img");
+          logo.className = "picai-shop-logo";
+          logo.src = resolvedLogo;
+          logo.alt = shopName;
+          logo.referrerPolicy = "no-referrer";
+          logo.style.width = "36px";
+          logo.style.height = "36px";
+          logo.style.borderRadius = "6px";
+          logo.style.objectFit = "cover";
+          logo.style.background = "#f2f3f7";
+          logo.addEventListener("error", function () {
+            if (logo && logo.parentNode) logo.parentNode.removeChild(logo);
+          });
+
+          shopNameEl.appendChild(logo);
+          shopNameEl.appendChild(document.createTextNode(shopName));
+        } else {
+          shopNameEl.textContent = shopName;
+        }
+      }
 
       var shopBox = shopHeader.querySelector(".group_13");
 

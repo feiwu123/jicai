@@ -7,7 +7,8 @@
     if (!el) return;
     el.style.cursor = "pointer";
     el.addEventListener("click", function () {
-      location.href = href;
+      var target = $.toUrl ? $.toUrl(href) : href;
+      location.href = target;
     });
   }
 
@@ -32,11 +33,12 @@
     return isFinite(n) ? n : NaN;
   }
 
-  function fmtMoney(v, prefix) {
+  function fmtMoney(v) {
+    if ($ && $.formatMoneyMXN) return $.formatMoneyMXN(v, { fallback: "--" });
     var s = safeText(v);
     if (!s) return "--";
     var n = parseNumber(s);
-    if (!isNaN(n)) return (prefix || "￥") + n.toFixed(2);
+    if (!isNaN(n)) return "$" + n.toFixed(2) + "MXN";
     return s;
   }
 
@@ -296,7 +298,7 @@
       );
       if (String(resp && resp.code) === "2") {
         if ($ && $.clearAuth) $.clearAuth();
-        location.replace("/login.html");
+        location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
         return;
       }
       if (String(resp && resp.code) !== "0") {
@@ -318,7 +320,13 @@
       details.forEach(function (it, idx) {
         var time = (it && (it.scanTime || it.scan_time || it.time)) || "";
         var desc = (it && (it.desc || it.description || it.context)) || "";
-        var sigPicUrl = (it && (it.sigPicUrl || it.sig_pic_url)) || "";
+        var sigPicUrl =
+          (it &&
+            (it.electronicSignaturePicUrl ||
+              it.electronic_signature_pic_url ||
+              it.sigPicUrl ||
+              it.sig_pic_url)) ||
+          "";
 
         var row = document.createElement("div");
         row.className = "picai-trace-item" + (idx === 0 ? " picai-trace-item--first" : "");
@@ -441,7 +449,7 @@
   async function load() {
     var orderId = getOrderId();
     if (!orderId) {
-      location.replace("/yuanxing/orders_list/index.html");
+      location.replace($.toUrl ? $.toUrl("/yuanxing/orders_list/index.html") : "/yuanxing/orders_list/index.html");
       return;
     }
 
@@ -453,7 +461,7 @@
     }
     if (String(resp && resp.code) === "2") {
       if ($ && $.clearAuth) $.clearAuth();
-      location.replace("/login.html");
+      location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
       return;
     }
     if (String(resp && resp.code) !== "0") return;

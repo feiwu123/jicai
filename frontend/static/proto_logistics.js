@@ -7,7 +7,8 @@
     if (!el) return;
     el.style.cursor = "pointer";
     el.addEventListener("click", function () {
-      location.href = href;
+      var target = $.toUrl ? $.toUrl(href) : href;
+      location.href = target;
     });
   }
 

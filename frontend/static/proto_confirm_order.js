@@ -16,7 +16,8 @@
     if (!el) return;
     el.style.cursor = "pointer";
     el.addEventListener("click", function () {
-      location.href = href;
+      var target = $.toUrl ? $.toUrl(href) : href;
+      location.href = target;
     });
   }
 
@@ -329,7 +330,7 @@
       if (String(resp.code) === "2") {
         $.clearAuth();
         showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-        location.replace("/login.html");
+        location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
         return;
       }
       if (String(resp.code) === "0") {
@@ -564,7 +565,7 @@
     var goBtn = modal.querySelector("[data-role='go']");
     if (goBtn) {
       goBtn.addEventListener("click", function () {
-        location.replace("/yuanxing/orders_list/index.html");
+        location.replace($.toUrl ? $.toUrl("/yuanxing/orders_list/index.html") : "/yuanxing/orders_list/index.html");
       });
     }
 
@@ -1010,7 +1011,7 @@
     if (String(resp.code) === "2") {
       $.clearAuth();
       showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-      location.replace("/login.html");
+      location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
       return;
     }
     if (String(resp.code) !== "0") {
@@ -1071,13 +1072,19 @@
     var goodsNum = total && (total.goods_num || total.goodsNum);
 
     var goodsAmountEl = document.querySelector("span.text_23");
-    if (goodsAmountEl && goodsAmount != null) goodsAmountEl.textContent = String(goodsAmount);
+    if (goodsAmountEl && goodsAmount != null) {
+      var goodsAmountText = String(goodsAmount);
+      goodsAmountEl.textContent = $.formatMoneyMXN ? $.formatMoneyMXN(goodsAmountText, { fallback: goodsAmountText }) : goodsAmountText;
+    }
     var goodsNumEl = document.querySelector("span.text_25");
     if (goodsNumEl && goodsNum != null) goodsNumEl.textContent = String(goodsNum);
     var skuEl = document.querySelector("span.text_27");
     if (skuEl && skuCount != null) skuEl.textContent = String(skuCount);
     var totalEl = document.querySelector("span.text_29");
-    if (totalEl && goodsAmount != null) totalEl.textContent = String(goodsAmount);
+    if (totalEl && goodsAmount != null) {
+      var totalText = String(goodsAmount);
+      totalEl.textContent = $.formatMoneyMXN ? $.formatMoneyMXN(totalText, { fallback: totalText }) : totalText;
+    }
   }
 
   function setRightSummaryEmpty() {
@@ -1169,7 +1176,8 @@
   function formatFreightValue(value) {
     if (value == null) return "--";
     var str = String(value).trim();
-    return str ? str : "--";
+    if (!str) return "--";
+    return $.formatMoneyMXN ? $.formatMoneyMXN(str, { fallback: str }) : str;
   }
 
   function setShopFreight(node, valueText) {
@@ -1196,7 +1204,7 @@
       if (String(resp.code) === "2") {
         $.clearAuth();
         showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-        location.replace("/login.html");
+        location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
         return null;
       }
       var codeNum = Number(resp.code);
@@ -1218,7 +1226,20 @@
   function fillShopHeader(node, shop) {
     if (!node) return;
     var nameEl = node.querySelector("span.text-group_2") || node.querySelector("span.text-group_5") || node.querySelector("span");
-    if (nameEl) nameEl.textContent = (shop && shop.shop_name) || "店铺";
+    var shopName = (shop && shop.shop_name) || "Shop";
+    if (nameEl) nameEl.textContent = shopName;
+
+    var logoEl = node.querySelector(".shop-name-wrap img") || node.querySelector("img.label_3") || node.querySelector("img.label_4");
+    var logoUrl = (shop && shop.shop_logo) ? String(shop.shop_logo).trim() : "";
+    if (logoEl) {
+      if (logoUrl) {
+        logoEl.src = $.toUrl ? $.toUrl(logoUrl) : logoUrl;
+        logoEl.alt = shopName;
+        logoEl.style.display = "";
+      } else {
+        logoEl.style.display = "none";
+      }
+    }
     ensureFreightEl(node);
   }
 
@@ -1262,13 +1283,14 @@
     if (img && it && it.goods_thumb) img.src = it.goods_thumb;
 
     var nameEl = node.querySelector("span.text_32") || node.querySelector("span.text_39") || node.querySelector("span.text_46") || node.querySelector("span");
-    if (nameEl) nameEl.textContent = (it && it.goods_name) || "";
     if (nameEl) {
-      // Allow product names to wrap (prototype CSS uses nowrap + fixed height).
-      nameEl.style.whiteSpace = "normal";
-      nameEl.style.height = "auto";
-      nameEl.style.lineHeight = "18px";
-      nameEl.style.wordBreak = "break-word";
+      var fullName = (it && it.goods_name) || "";
+      nameEl.textContent = fullName;
+      nameEl.title = fullName;
+      // Match cart: single-line with ellipsis.
+      nameEl.style.whiteSpace = "nowrap";
+      nameEl.style.overflow = "hidden";
+      nameEl.style.textOverflow = "ellipsis";
     }
 
     // Use second line as SKU when present
@@ -1281,15 +1303,27 @@
       line3.textContent = "";
       line3.style.display = "none";
     }
+    // Hide status badge column to match cart item info.
+    var statusWrap =
+      node.querySelector(".text-wrapper_10") ||
+      node.querySelector(".text-wrapper_12") ||
+      node.querySelector(".text-wrapper_14");
+    if (statusWrap) statusWrap.style.display = "none";
 
     var priceEl = node.querySelector("span.text_36") || node.querySelector("span.text_43") || node.querySelector("span.text_50");
-    if (priceEl) priceEl.textContent = (it && it.goods_price) || "";
+    if (priceEl) {
+      var rawPrice = (it && it.goods_price) || "";
+      priceEl.textContent = $.formatMoneyMXN ? $.formatMoneyMXN(rawPrice) : rawPrice;
+    }
 
     var qtyEl = node.querySelector("span.text_37") || node.querySelector("span.text_44") || node.querySelector("span.text_51");
     if (qtyEl) qtyEl.textContent = "×" + String((it && it.goods_number) || "1");
 
     var amountEl = node.querySelector("span.text_38") || node.querySelector("span.text_45") || node.querySelector("span.text_52");
-    if (amountEl) amountEl.textContent = (it && it.goods_amount) || "";
+    if (amountEl) {
+      var rawAmount = (it && it.goods_amount) || "";
+      amountEl.textContent = $.formatMoneyMXN ? $.formatMoneyMXN(rawAmount) : rawAmount;
+    }
   }
 
   function renderConfirmGoods(groups) {
@@ -1340,7 +1374,7 @@
     if (String(resp.code) === "2") {
       $.clearAuth();
       showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-      location.replace("/login.html");
+      location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
       return;
     }
     if (String(resp.code) !== "0") {
@@ -1434,7 +1468,7 @@
           $.clearAuth();
           hideSubmitProgress();
           showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-          location.replace("/login.html");
+          location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
           return;
         }
 

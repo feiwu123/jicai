@@ -7,7 +7,8 @@
     if (!el) return;
     el.style.cursor = "pointer";
     el.addEventListener("click", function () {
-      location.href = href;
+      var target = $.toUrl ? $.toUrl(href) : href;
+      location.href = target;
     });
   }
 
@@ -77,7 +78,7 @@
       if (String(resp.code) === "2") {
         $.clearAuth();
         showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-        location.replace("/login.html");
+        location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
         return;
       }
       if (String(resp.code) === "0") {
@@ -187,7 +188,7 @@
         if (String(resp.code) === "2") {
           $.clearAuth();
           showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-          location.replace("/login.html");
+          location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
           return;
         }
         if (String(resp.code) === "0") {
@@ -273,7 +274,7 @@
     if (String(resp.code) === "2") {
       $.clearAuth();
       showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-      location.replace("/login.html");
+      location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
       return;
     }
     if (String(resp.code) !== "0") {

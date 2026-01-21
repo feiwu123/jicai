@@ -111,7 +111,7 @@
       if (String(resp.code) === "0") {
         show("注册成功，请登录", { autoCloseMs: 1200 });
         setTimeout(function () {
-          location.replace("/login.html");
+          location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
         }, 900);
         return;
       }
@@ -128,6 +128,6 @@
   btnRegister.addEventListener("click", register);
   btnBack.addEventListener("click", function () {
     stopCountdown();
-    location.replace("/login.html");
+    location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
   });
 })();

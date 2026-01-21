@@ -6,6 +6,7 @@ services:
     environment:
       PICAI_HOST: 0.0.0.0
       PICAI_PORT: 8000
+      PICAI_BASE_PATH: ${PICAI_BASE_PATH:-/wholesales}
       TOPM_BASE: ${TOPM_BASE:-https://topm.tech}
     ports:
       - "${PICAI_HTTP_PORT:-1512}:8000"

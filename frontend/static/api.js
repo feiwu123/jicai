@@ -16,6 +16,95 @@
     return params.toString();
   }
 
+  function collapseDoubleBase(base) {
+    if (!base) return base;
+    var parts = String(base)
+      .split("/")
+      .filter(function (p) {
+        return p;
+      });
+    if (parts.length < 2) return base;
+
+    if (parts.length % 2 === 0) {
+      var half = parts.length / 2;
+      var same = true;
+      for (var i = 0; i < half; i++) {
+        if (parts[i] !== parts[i + half]) {
+          same = false;
+          break;
+        }
+      }
+      if (same) return "/" + parts.slice(0, half).join("/");
+    }
+
+    var last = parts.length - 1;
+    if (parts[last] === parts[last - 1]) {
+      return "/" + parts.slice(0, last).join("/");
+    }
+
+    return base;
+  }
+
+  function normalizeBase(base) {
+    if (!base) return "";
+    if (base === "/") return "";
+    var trimmed = String(base).replace(/\/+$/, "");
+    return collapseDoubleBase(trimmed);
+  }
+
+  function detectBasePath() {
+    try {
+      if (typeof window !== "undefined" && window.PICAI_BASE_PATH != null) {
+        return normalizeBase(window.PICAI_BASE_PATH);
+      }
+    } catch (e) {}
+
+    try {
+      var meta = document.querySelector('meta[name="picai-base"]');
+      if (meta && meta.content) return normalizeBase(meta.content);
+    } catch (e) {}
+
+    var path = "/";
+    try {
+      path = location.pathname || "/";
+    } catch (e) {}
+
+    var idx = path.indexOf("/yuanxing/");
+    if (idx >= 0) return normalizeBase(path.slice(0, idx) || "/");
+
+    var m = path.match(/^(.*)\/[^/]*\.html$/);
+    if (m) return normalizeBase(m[1] || "/");
+
+    return normalizeBase(path.replace(/\/$/, "") || "/");
+  }
+
+  var BASE_PATH = detectBasePath();
+
+  function toUrl(path) {
+    if (!path) return path;
+    var str = String(path);
+    if (/^(?:[a-z]+:)?\/\//i.test(str)) return str;
+    if (str.indexOf("data:") === 0 || str.indexOf("mailto:") === 0 || str.indexOf("tel:") === 0) return str;
+    if (str.indexOf("#") === 0) return str;
+
+    var base = BASE_PATH;
+    if (!base) return str;
+
+    if (str[0] === "/") {
+      if (str === base || str.indexOf(base + "/") === 0) return str;
+      return base + str;
+    }
+
+    return base + "/" + str;
+  }
+
+  function fixHtmlPaths(html) {
+    if (!html) return html;
+    var base = BASE_PATH;
+    if (!base) return html;
+    return String(html).replace(/(^|\s)(src|href)=(['"])\//g, "$1$2=$3" + base + "/");
+  }
+
   function qs(sel, root) {
     return (root || document).querySelector(sel);
   }
@@ -28,13 +117,32 @@
       token: localStorage.getItem("picai_token") || "",
     };
   }
+  var AUTH_USER_COOKIE = "picai_user";
+  var AUTH_TOKEN_COOKIE = "picai_token";
+  var AUTH_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+  function setCookie(name, value, maxAgeSeconds) {
+    try {
+      var v = encodeURIComponent(String(value || ""));
+      var maxAge = String(maxAgeSeconds || 0);
+      document.cookie = name + "=" + v + "; Max-Age=" + maxAge + "; Path=/; SameSite=Lax";
+    } catch (e) {}
+  }
+  function deleteCookie(name) {
+    try {
+      document.cookie = name + "=; Max-Age=0; Path=/; SameSite=Lax";
+    } catch (e) {}
+  }
   function setAuth(user, token) {
     localStorage.setItem("picai_user", user || "");
     localStorage.setItem("picai_token", token || "");
+    setCookie(AUTH_USER_COOKIE, user || "", AUTH_COOKIE_MAX_AGE_SECONDS);
+    setCookie(AUTH_TOKEN_COOKIE, token || "", AUTH_COOKIE_MAX_AGE_SECONDS);
   }
   function clearAuth() {
     localStorage.removeItem("picai_user");
     localStorage.removeItem("picai_token");
+    deleteCookie(AUTH_USER_COOKIE);
+    deleteCookie(AUTH_TOKEN_COOKIE);
   }
   function buildReturnUrl() {
     try {
@@ -47,10 +155,33 @@
     var a = getAuth();
     if (!a.user || !a.token) {
       var ret = encodeURIComponent(buildReturnUrl());
-      location.replace("/login.html?return=" + ret);
+      location.replace(toUrl("/login.html") + "?return=" + ret);
       return null;
     }
     return a;
+  }
+
+  function parseMoneyNumber(value) {
+    if (value == null) return NaN;
+    if (typeof value === "number") return isFinite(value) ? value : NaN;
+    var str = String(value).trim();
+    if (!str) return NaN;
+    str = str.replace(/,/g, "");
+    var match = str.match(/-?\d+(?:\.\d+)?/);
+    if (!match) return NaN;
+    var n = parseFloat(match[0]);
+    return isFinite(n) ? n : NaN;
+  }
+
+  function formatMoneyMXN(value, opts) {
+    opts = opts || {};
+    var fallback = Object.prototype.hasOwnProperty.call(opts, "fallback") ? opts.fallback : "--";
+    if (value == null) return fallback;
+    var str = String(value).trim();
+    if (!str) return fallback;
+    var n = parseMoneyNumber(str);
+    if (!isFinite(n)) return str;
+    return "$" + n.toFixed(2) + "MXN";
   }
 
   // Default to application/x-www-form-urlencoded to match the upstream PHP API.
@@ -68,7 +199,7 @@
       payload = encodeForm(body || {});
     }
 
-    var res = await fetch(path, {
+    var res = await fetch(toUrl(path), {
       method: "POST",
       headers: headers,
       body: payload,
@@ -161,7 +292,7 @@
         e.stopPropagation();
         clearAuth();
         menu.style.display = "none";
-        location.replace("/login.html");
+        location.replace(toUrl("/login.html"));
       });
       menu.appendChild(btn);
       document.body.appendChild(menu);
@@ -638,7 +769,7 @@
     if (String(resp.code) === "2") {
       clearAuth();
       showModalMessage("登录已失效，请重新登录", { autoCloseMs: 900 });
-      location.replace("/login.html");
+      location.replace(toUrl("/login.html"));
       return;
     }
     var codeNum = Number(resp.code);
@@ -662,6 +793,9 @@
     setAuth: setAuth,
     clearAuth: clearAuth,
     requireAuth: requireAuth,
+    basePath: BASE_PATH,
+    toUrl: toUrl,
+    fixHtmlPaths: fixHtmlPaths,
     apiPost: apiPost,
     withAuth: withAuth,
     mountQuickNav: mountQuickNav,
@@ -671,6 +805,7 @@
     renderUserName: renderUserName,
     alignHeaderRightIcons: alignHeaderRightIcons,
     statusText: statusText,
+    formatMoneyMXN: formatMoneyMXN,
     ensureCartBadge: ensureCartBadge,
     refreshCartBadge: refreshCartBadge,
   };

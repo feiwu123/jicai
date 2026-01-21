@@ -108,7 +108,7 @@
       if (String(resp.code) === "0") {
         show("密码修改成功，请重新登录", { autoCloseMs: 1200 });
         setTimeout(function () {
-          location.replace("/login.html");
+          location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
         }, 900);
         return;
       }
@@ -125,6 +125,6 @@
   btnSubmit.addEventListener("click", submit);
   btnBack.addEventListener("click", function () {
     stopCountdown();
-    location.replace("/login.html");
+    location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
   });
 })();

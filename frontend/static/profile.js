@@ -100,7 +100,7 @@
         try {
           ret = encodeURIComponent(location.pathname + location.search + location.hash);
         } catch (e) {}
-        location.replace("/login.html?return=" + ret);
+        location.replace($.toUrl ? $.toUrl("/login.html") + "?return=" + ret : "/login.html?return=" + ret);
         return;
       }
       if (String(resp && resp.code) !== "0") return;
