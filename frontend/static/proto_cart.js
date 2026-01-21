@@ -13,6 +13,14 @@
     alert(msg);
   }
 
+  function toUrl(path) {
+    try {
+      return $.toUrl ? $.toUrl(path) : path;
+    } catch (e) {
+      return path;
+    }
+  }
+
   function ensureCartExtraStyle() {
     var id = "picaiCartExtraStyle";
     if (document.getElementById(id)) return;
@@ -83,7 +91,7 @@
     if (String(resp.code) === "2") {
       $.clearAuth();
       showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-      location.replace("/login.html");
+      location.replace(toUrl("/login.html"));
       return;
     }
     var codeNum = Number(resp.code);
@@ -104,7 +112,7 @@
     if (!el) return;
     el.style.cursor = "pointer";
     el.addEventListener("click", function () {
-      location.href = href;
+      location.href = toUrl(href);
     });
   }
 
@@ -437,7 +445,7 @@
         if (String(resp.code) === "2") {
           $.clearAuth();
           showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-          location.replace("/login.html");
+          location.replace(toUrl("/login.html"));
           return;
         }
         failed += 1;
@@ -492,7 +500,7 @@
           if (String(resp.code) === "2") {
             $.clearAuth();
             showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-            location.replace("/login.html");
+            location.replace(toUrl("/login.html"));
             return false;
           }
           showMsg((resp && resp.msg) || "同步数量失败");
@@ -516,7 +524,7 @@
       }
       var ok = await syncQtyEdits();
       if (!ok) return;
-      location.href = "/yuanxing/confirm_order/index.html?cart_value=" + encodeURIComponent(ids.join(","));
+      location.href = toUrl("/yuanxing/confirm_order/index.html?cart_value=" + encodeURIComponent(ids.join(",")));
     }
 
     btnHost.addEventListener("click", function () {
@@ -602,7 +610,7 @@
       } else if (String(resp.code) === "2") {
         $.clearAuth();
         showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-        location.replace("/login.html");
+        location.replace(toUrl("/login.html"));
       } else {
         showMsg((resp && resp.msg) || "更新失败");
       }
@@ -636,7 +644,7 @@
         } else if (String(resp.code) === "2") {
           $.clearAuth();
           showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-          location.replace("/login.html");
+          location.replace(toUrl("/login.html"));
         } else {
           showMsg((resp && resp.msg) || "删除失败");
         }
@@ -672,7 +680,7 @@
     if (String(resp.code) === "2") {
       $.clearAuth();
       showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
-      location.replace("/login.html");
+      location.replace(toUrl("/login.html"));
       return;
     }
     if (String(resp.code) !== "0") {
