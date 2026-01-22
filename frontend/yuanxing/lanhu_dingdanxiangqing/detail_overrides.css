@@ -658,7 +658,8 @@
 }
 
 #picaiOrderDetail .picai-order-detail-content .text_21-0 {
-  margin-left: auto;
+  margin-left: clamp(24px, 18vw, 260px);
+  text-align: left;
 }
 
 #picaiOrderDetail .picai-order-detail-content .text_23-0 {
@@ -679,7 +680,8 @@
 }
 
 #picaiOrderDetail .picai-order-detail-content .text_26-0 {
-  margin-left: auto;
+  margin-left: clamp(24px, 18vw, 260px);
+  text-align: left;
 }
 
 #picaiOrderDetail .picai-order-detail-content .text_27-0 {

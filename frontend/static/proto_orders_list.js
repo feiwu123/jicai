@@ -119,7 +119,9 @@
     pageSize: 10,
     total: 0,
     totalPages: 1,
+    orderStatus: "0",
   };
+  var templateCache = null;
 
   function ensureStatusStyles() {
     var id = "picaiOrdersStatusStyle";
@@ -135,9 +137,11 @@
       ".picai-status-badge--os2{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}" +
       ".picai-status-badge--os3{color:#334155;background:rgba(148,163,184,0.22);border-color:rgba(148,163,184,0.35)}" +
       ".picai-status-badge--os4{color:#6b21a8;background:rgba(168,85,247,0.16);border-color:rgba(168,85,247,0.32)}" +
+      ".picai-status-badge--os8{color:#6b21a8;background:rgba(168,85,247,0.16);border-color:rgba(168,85,247,0.32)}" +
       ".picai-status-badge--ps0{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}" +
       ".picai-status-badge--ps1{color:#1e3a8a;background:rgba(59,130,246,0.16);border-color:rgba(59,130,246,0.32)}" +
       ".picai-status-badge--ps2{color:#166534;background:rgba(34,197,94,0.16);border-color:rgba(34,197,94,0.35)}" +
+      ".picai-status-badge--ps4{color:#6b21a8;background:rgba(168,85,247,0.16);border-color:rgba(168,85,247,0.32)}" +
       ".picai-status-badge--ss0{color:#334155;background:rgba(148,163,184,0.22);border-color:rgba(148,163,184,0.35)}" +
       ".picai-status-badge--ss1{color:#1e3a8a;background:rgba(59,130,246,0.16);border-color:rgba(59,130,246,0.32)}" +
       ".picai-status-badge--ss2{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}" +
@@ -161,16 +165,31 @@
     var ps = String((order && order.pay_status) != null ? order.pay_status : "");
     var ss = String((order && order.shipping_status) != null ? order.shipping_status : "");
 
-    var orderMap = { "0": "未确认", "1": "已确认", "2": "已取消", "3": "无效", "4": "退货" };
-    var payMap = { "0": "未付款", "1": "已付款中", "2": "已付款" };
-    var shipMap = { "0": "未发货", "1": "已发货", "2": "已取消", "3": "备货中" };
+    var orderMap = {
+      "0": "\u672a\u786e\u8ba4",
+      "1": "\u5df2\u786e\u8ba4",
+      "2": "\u5df2\u53d6\u6d88",
+      "3": "\u65e0\u6548",
+      "4": "\u9000\u8d27",
+      "8": "\u4ec5\u9000\u6b3e",
+    };
+    var payMap = {
+      "0": "\u672a\u4ed8\u6b3e",
+      "1": "\u5df2\u4ed8\u6b3e\u4e2d",
+      "2": "\u5df2\u4ed8\u6b3e",
+      "4": "\u5df2\u9000\u6b3e",
+    };
+    var shipMap = { "0": "\u672a\u53d1\u8d27", "1": "\u5df2\u53d1\u8d27", "2": "\u5df2\u53d6\u6d88", "3": "\u5907\u8d27\u4e2d" };
 
     host.textContent = "";
     host.classList.add("picai-status-badges");
 
-    if (Object.prototype.hasOwnProperty.call(orderMap, os)) host.appendChild(makeBadge(orderMap[os], "picai-status-badge--os" + os, "订单状态"));
-    if (Object.prototype.hasOwnProperty.call(payMap, ps)) host.appendChild(makeBadge(payMap[ps], "picai-status-badge--ps" + ps, "支付状态"));
-    if (Object.prototype.hasOwnProperty.call(shipMap, ss)) host.appendChild(makeBadge(shipMap[ss], "picai-status-badge--ss" + ss, "物流状态"));
+    if (Object.prototype.hasOwnProperty.call(orderMap, os))
+      host.appendChild(makeBadge(orderMap[os], "picai-status-badge--os" + os, "\u8ba2\u5355\u72b6\u6001"));
+    if (Object.prototype.hasOwnProperty.call(payMap, ps))
+      host.appendChild(makeBadge(payMap[ps], "picai-status-badge--ps" + ps, "\u652f\u4ed8\u72b6\u6001"));
+    if (Object.prototype.hasOwnProperty.call(shipMap, ss))
+      host.appendChild(makeBadge(shipMap[ss], "picai-status-badge--ss" + ss, "\u7269\u6d41\u72b6\u6001"));
 
     // Fallback: if any code is missing, keep existing combined status text.
     if (!host.childNodes || host.childNodes.length === 0) {
@@ -408,10 +427,21 @@
 
   function parseTemplates(area) {
     if (!area) return null;
+    if (templateCache && templateCache.header && templateCache.item) {
+      return {
+        title: area.querySelector(".text_15"),
+        header: templateCache.header.cloneNode(true),
+        item: templateCache.item.cloneNode(true),
+      };
+    }
     var header = area.querySelector(".group_3");
     var item = area.querySelector(".group_4");
     if (!header || !item) return null;
-    return { title: area.querySelector(".text_15"), header: header.cloneNode(true), item: item.cloneNode(true) };
+    templateCache = {
+      header: header.cloneNode(true),
+      item: item.cloneNode(true),
+    };
+    return { title: area.querySelector(".text_15"), header: templateCache.header.cloneNode(true), item: templateCache.item.cloneNode(true) };
   }
 
   function clearArea(area, keepTitle) {
@@ -685,10 +715,21 @@
 
     var total = node.querySelector("span.text_27");
     if (total) {
-      var p = parseFloat(g.goods_price || "0");
-      var n = parseInt(g.goods_number || "1", 10) || 1;
-      var totalRaw = isFinite(p) ? String((p * n).toFixed(2)) : "";
-      total.textContent = $.formatMoneyMXN ? $.formatMoneyMXN(totalRaw, { fallback: totalRaw }) : totalRaw;
+      var formattedTotal = (order && (order.format_total_fee || order.format_operate_amount)) || "";
+      var rawTotal =
+        order && order.total_fee != null
+          ? order.total_fee
+          : order && order.operate_amount != null
+          ? order.operate_amount
+          : "";
+      var orderTotal = formattedTotal
+        ? String(formattedTotal)
+        : rawTotal !== ""
+        ? $.formatMoneyMXN
+          ? $.formatMoneyMXN(rawTotal, { fallback: rawTotal })
+          : String(rawTotal)
+        : "";
+      total.textContent = showActions ? orderTotal : "";
     }
 
     var existingActions = node.querySelector(".order-actions");
@@ -885,6 +926,80 @@
     node.appendChild(actionsWrap);
   }
 
+  function setTabActive(tab, active) {
+    if (!tab) return;
+    tab.style.cursor = "pointer";
+    tab.style.backgroundColor = active ? "rgba(59,131,246,1)" : "rgba(249,250,252,1)";
+    tab.style.borderColor = active ? "rgba(59,131,246,1)" : "rgba(241,245,249,1)";
+    tab.style.borderStyle = "solid";
+    tab.style.borderWidth = "1px";
+    var span = tab.querySelector("span");
+    if (span) span.style.color = active ? "rgba(255,255,255,1)" : "rgba(100,116,139,1)";
+  }
+
+  function wireStatusTabs() {
+    var area = document.querySelector(".section_5");
+    if (!area) return;
+    function getTabs() {
+      return Array.prototype.slice.call(area.querySelectorAll("[data-order-status]"));
+    }
+
+    function ensureCurrent(tabs) {
+      if (!tabs.length) return;
+      var current = String(state.orderStatus || "");
+      var hasCurrent = tabs.some(function (tab) {
+        return String(tab.getAttribute("data-order-status") || "") === current;
+      });
+      if (!hasCurrent) {
+        state.orderStatus = String(tabs[0].getAttribute("data-order-status") || "0");
+      }
+    }
+
+    function setActive(status) {
+      var activeStatus = String(status || "0");
+      getTabs().forEach(function (tab) {
+        var s = String(tab.getAttribute("data-order-status") || "");
+        setTabActive(tab, s === activeStatus);
+      });
+    }
+
+    function handleSelect(tab) {
+      if (!tab) return;
+      var nextStatus = String(tab.getAttribute("data-order-status") || "0");
+      state.orderStatus = nextStatus;
+      state.page = 1;
+      setActive(nextStatus);
+      load();
+    }
+
+    var tabs = getTabs();
+    if (!tabs.length) return;
+    tabs.forEach(function (tab) {
+      tab.style.cursor = "pointer";
+      tab.setAttribute("role", "button");
+      tab.setAttribute("tabindex", "0");
+    });
+
+    ensureCurrent(tabs);
+    setActive(state.orderStatus || "0");
+
+    area.addEventListener("click", function (e) {
+      var tab = e.target && e.target.closest ? e.target.closest("[data-order-status]") : null;
+      if (!tab || !area.contains(tab)) return;
+      handleSelect(tab);
+    });
+
+    area.addEventListener("keydown", function (e) {
+      if (!e) return;
+      var key = e.key || e.code || "";
+      if (key !== "Enter" && key !== " " && key !== "Spacebar") return;
+      var tab = e.target && e.target.closest ? e.target.closest("[data-order-status]") : null;
+      if (!tab || !area.contains(tab)) return;
+      e.preventDefault();
+      handleSelect(tab);
+    });
+  }
+
   function wireSearch() {
     var searchArea = document.querySelector(".section_2");
     if (!searchArea) return;
@@ -915,10 +1030,13 @@
     ensureEmpty(area, titleEl, "暂时没有数据");
     renderPagination(area);
 
-    var resp = await $.apiPost(
-      "/api/wholesales/orders.php?action=lists",
-      $.withAuth({ page: String(state.page || 1), size: String(state.reqSize || 10), keywords: state.keywords || "" })
-    );
+    var payload = {
+      page: String(state.page || 1),
+      size: String(state.reqSize || 10),
+      keywords: state.keywords || "",
+      order_status: String(state.orderStatus || "0"),
+    };
+    var resp = await $.apiPost("/api/wholesales/orders.php?action=lists", $.withAuth(payload));
     if (String(resp.code) === "2") {
       $.clearAuth();
       alert("登录已失效，请重新登录");
@@ -983,6 +1101,7 @@
 
   if (!skipDataLoad) {
     wireSearch();
+    wireStatusTabs();
     load("");
   }
 })();
