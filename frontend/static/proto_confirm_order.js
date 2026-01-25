@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   var $ = window.picai;
   var auth = $.requireAuth();
   if (!auth) return;
@@ -6,6 +6,7 @@
   var cachedAddressTpl = null;
   var cachedAddressUiDisplay = { list: null, card: null };
   var cachedAddressActions = { add: null, topm: null };
+  var topmAddressCache = null;
   var lastCartGroups = [];
   var isSubmitting = false;
   var selectedAddress = null;
@@ -97,29 +98,35 @@
       "    </div>" +
       '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span>Email</span></div>' +
+      '        <input class="addr-modal-input" data-role="mailBox" autocomplete="email" />' +
+      "      </div>" +
+      '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>国家三字码</span></div>' +
       '        <input class="addr-modal-input" data-role="countryCode" placeholder="如：MEX" />' +
       "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>邮政编码</span></div>' +
       '        <input class="addr-modal-input" data-role="postCode" autocomplete="postal-code" />' +
       "      </div>" +
-      "    </div>" +
-      '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>州/省</span></div>' +
       '        <input class="addr-modal-input" data-role="prov" />' +
       "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>城市</span></div>' +
       '        <input class="addr-modal-input" data-role="city" />' +
       "      </div>" +
-      "    </div>" +
-      '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>区域</span></div>' +
       '        <input class="addr-modal-input" data-role="area" />' +
       "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>详细地址</span></div>' +
       '        <input class="addr-modal-input" data-role="address" autocomplete="street-address" />' +
@@ -201,6 +208,7 @@
     var companyEl = qs("company");
     var mobileEl = qs("mobile");
     var phoneEl = qs("phone");
+    var mailBoxEl = qs("mailBox");
     var countryCodeEl = qs("countryCode");
     var postCodeEl = qs("postCode");
     var provEl = qs("prov");
@@ -220,6 +228,7 @@
     setVal(companyEl, initial.company || "");
     setVal(mobileEl, initial.mobile || initial.phone || "");
     setVal(phoneEl, initial.phone || "");
+    setVal(mailBoxEl, initial.mailBox || initial.mail_box || initial.mailbox || "");
     setVal(countryCodeEl, initial.countryCode || initial.country_code || "MEX");
     setVal(postCodeEl, initial.postCode || initial.post_code || "");
     setVal(provEl, initial.prov || "");
@@ -271,6 +280,7 @@
           company: readTrim(companyEl),
           mobile: readTrim(mobileEl),
           phone: readTrim(phoneEl),
+          mailBox: readTrim(mailBoxEl),
           countryCode: readTrim(countryCodeEl) || "MEX",
           postCode: readTrim(postCodeEl),
           prov: readTrim(provEl),
@@ -311,7 +321,7 @@
       name: values.name,
       company: values.company || "",
       postCode: values.postCode,
-      mailBox: "",
+      mailBox: values.mailBox || "",
       mobile: values.mobile || mobileOrPhone,
       phone: values.phone || mobileOrPhone,
       countryCode: values.countryCode,
@@ -577,6 +587,7 @@
     if (!modal) return;
     modal.classList.add("hidden");
     document.body.style.overflow = "";
+    location.replace($.toUrl ? $.toUrl("/yuanxing/orders_list/index.html") : "/yuanxing/orders_list/index.html");
   }
 
   function showSubmitResultModal(steps, results, failures) {
@@ -824,6 +835,17 @@
 
     addrs = addrs || [];
     if (addrs && !Array.isArray(addrs)) addrs = [addrs];
+    var topmAddress = addrs.find(function (a) {
+      if (!a) return false;
+      var uid = a.user_id != null ? a.user_id : a.userId != null ? a.userId : a.userid;
+      return String(uid) === "0";
+    });
+    topmAddressCache = topmAddress || null;
+    addrs = addrs.filter(function (a) {
+      if (!a) return false;
+      var uid = a.user_id != null ? a.user_id : a.userId != null ? a.userId : a.userid;
+      return String(uid) !== "0";
+    });
 
     setAddressUiVisible(true);
     clearList(list);
@@ -838,13 +860,14 @@
         actions.topm.addEventListener("click", function (e) {
           e.stopPropagation();
           selectedAddressId = "TOPM";
-          selectedAddress = null;
+          selectedAddress = topmAddressCache || null;
           window.picai.qsa("[data-address-id]").forEach(function (el) {
             el.style.outline = "none";
             el.style.borderRadius = "10px";
           });
           actions.topm.style.outline = "2px solid rgba(106,124,255,0.55)";
           actions.topm.style.borderRadius = "10px";
+          if (topmAddressCache) fillSelectedAddressCard(topmAddressCache);
           refreshFreightForGroups(lastCartGroups);
         });
       }
@@ -861,13 +884,14 @@
     if (!actions.topm) {
       var topmItem = makeSpecialAddressItem("TOPM收货仓", function () {
         selectedAddressId = "TOPM";
-        selectedAddress = null;
+        selectedAddress = topmAddressCache || null;
         window.picai.qsa("[data-address-id]").forEach(function (el) {
           el.style.outline = "none";
           el.style.borderRadius = "10px";
         });
         topmItem.style.outline = "2px solid rgba(106,124,255,0.55)";
         topmItem.style.borderRadius = "10px";
+        if (topmAddressCache) fillSelectedAddressCard(topmAddressCache);
         refreshFreightForGroups(lastCartGroups);
       });
       if (topmItem) topmItem.setAttribute("data-address-id", "TOPM");
@@ -882,6 +906,8 @@
           topmSel.style.outline = "2px solid rgba(106,124,255,0.55)";
           topmSel.style.borderRadius = "10px";
         }
+        if (topmAddressCache) fillSelectedAddressCard(topmAddressCache);
+        selectedAddress = topmAddressCache || null;
       } else {
         selectedAddressId = "";
       }
@@ -998,6 +1024,8 @@
         topmSel2.style.outline = "2px solid rgba(106,124,255,0.55)";
         topmSel2.style.borderRadius = "10px";
       }
+      if (topmAddressCache) fillSelectedAddressCard(topmAddressCache);
+      selectedAddress = topmAddressCache || null;
     } else if (selectedAddressId) {
       var selected = addrs.find(function (x) {
         return String(x && x.address_id) === String(selectedAddressId);

@@ -260,10 +260,27 @@
     }
 
     // Consignee info
-    setText(".text_19-1", d.consignee || "--");
-    setText(".text_22-1", d.mobile || d.tel || "--");
-    var fullAddr = [d.province, d.city, d.district, d.address].filter(Boolean).map(safeText).join("");
-    setText(".text_25-1", fullAddr || "--");
+    function setConsignee(role, value) {
+      var el = qs("[data-role='" + role + "']", detailRoot);
+      if (!el) return;
+      var v = safeText(value);
+      el.textContent = v ? v : "--";
+    }
+
+    setConsignee("consignee-name", d.consignee || d.name || "");
+    setConsignee("consignee-company", d.company || d.company_name || d.consignee_company || "");
+    setConsignee("consignee-mobile", d.mobile || "");
+    setConsignee("consignee-phone", d.tel || d.phone || "");
+    setConsignee("consignee-email", d.mailBox || d.mail_box || d.mailbox || d.email || "");
+    setConsignee("consignee-country", d.countryCode || d.country_code || d.country || "");
+    setConsignee(
+      "consignee-post",
+      d.postCode || d.post_code || d.zip || d.zipcode || d.destinationZipCode || ""
+    );
+    setConsignee("consignee-prov", d.province || d.prov || d.state || "");
+    setConsignee("consignee-city", d.city || "");
+    setConsignee("consignee-area", d.district || d.area || "");
+    setConsignee("consignee-address", d.address || "");
   }
 
   async function renderLogistics(orderId) {
@@ -468,7 +485,12 @@
 
     var d = (resp && resp.data) || {};
     setOrderInfo(d);
-    renderLogistics(orderId);
+    var logisticsHost = qs(".group_5", detailRoot);
+    var shipped = String(d && d.shipping_status) === "1";
+    if (logisticsHost) logisticsHost.style.display = shipped ? "" : "none";
+    if (shipped) {
+      renderLogistics(orderId);
+    }
     renderGoods(d);
   }
 

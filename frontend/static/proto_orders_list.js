@@ -26,6 +26,38 @@
     alert(msg);
   }
 
+  async function refreshBalance() {
+    try {
+      var resp = await $.apiPost("/api/wholesales/users.php?action=profile", $.withAuth({}));
+      if (String(resp && resp.code) === "2") {
+        if ($.clearAuth) $.clearAuth();
+        location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
+        return;
+      }
+      if (String(resp && resp.code) !== "0") return;
+      var data = (resp && resp.data) || {};
+      var userMoney = data.user_money != null ? String(data.user_money) : "";
+      var balanceText = "余额：" + (userMoney !== "" ? userMoney : "--");
+      var avatars = document.querySelectorAll("img.label_2");
+      avatars.forEach(function (img) {
+        var parent = img && img.parentElement;
+        if (!parent) return;
+        var balanceEl = parent.querySelector("span.text_5");
+        if (!balanceEl) {
+          var n2 = parent.querySelector("span.text_3");
+          var b2 = parent.querySelector("span.text_4");
+          if (n2 && b2) balanceEl = b2;
+        }
+        if (!balanceEl) {
+          var n3 = parent.querySelector("span.text_52");
+          var b3 = parent.querySelector("span.text_53");
+          if (n3 && b3) balanceEl = b3;
+        }
+        if (balanceEl) balanceEl.textContent = balanceText;
+      });
+    } catch (e) {}
+  }
+
   function makeNavClick(el, href) {
     if (!el) return;
     el.style.cursor = "pointer";
@@ -761,13 +793,19 @@
 
     // View logistics
     if (track) {
-      track.textContent = "查看物流";
-      track.style.cursor = "pointer";
-      track.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        showLogisticsModal(order || {}, g || {});
-      });
+      var canTrack = String(order && order.shipping_status) === "1";
+      if (!canTrack) {
+        if (track.parentNode) track.parentNode.removeChild(track);
+        track = null;
+      } else {
+        track.textContent = "查看物流";
+        track.style.cursor = "pointer";
+        track.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          showLogisticsModal(order || {}, g || {});
+        });
+      }
     }
 
     // View order
@@ -825,6 +863,10 @@
             }
             if (String(resp.code) === "0") {
               showMsg((resp && resp.msg) || "支付成功", { autoCloseMs: 3000 });
+              try {
+                load();
+              } catch (e) {}
+              refreshBalance();
             } else {
               showMsg((resp && resp.msg) || "支付失败", { autoCloseMs: 3000 });
             }
@@ -895,6 +937,7 @@
               try {
                 load();
               } catch (e) {}
+              refreshBalance();
             } else {
               showMsg((resp && resp.msg) || "\u9000\u6b3e\u5931\u8d25", { autoCloseMs: 3000 });
             }
@@ -913,11 +956,11 @@
     var actionsWrap = document.createElement("div");
     actionsWrap.className = "order-actions";
     if (cancel) {
-      node.removeChild(cancel);
+      if (cancel.parentNode) cancel.parentNode.removeChild(cancel);
       actionsWrap.appendChild(cancel);
     }
     if (track) {
-      node.removeChild(track);
+      if (track.parentNode) track.parentNode.removeChild(track);
       actionsWrap.appendChild(track);
     }
     actionsWrap.appendChild(viewBtn);

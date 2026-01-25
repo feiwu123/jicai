@@ -68,7 +68,7 @@
 }
 .picai-goods-list-page .group_8 .text_20 {
   grid-column: 10 / 14;
-  text-align: center;
+  text-align: left;
 }
 
 /* Row: remove prototype "position by margins" so it can shrink within the row width. */
@@ -130,9 +130,9 @@
 .picai-goods-list-page .section_9 .text_27,
 .picai-goods-list-page .section_9 .text_28,
 .picai-goods-list-page .section_9 .text_29 {
-  width: auto !important;
+  width: 100%;
   justify-self: end;
-  text-align: right;
+  text-align: left;
   overflow-wrap: anywhere;
   word-break: break-word;
   white-space: normal;

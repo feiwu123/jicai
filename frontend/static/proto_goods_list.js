@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   var $ = window.picai;
   var auth = $.requireAuth();
   if (!auth) return;
@@ -35,6 +35,9 @@
     totalPages: 1,
     cartKeys: null,
     cartFetchedAt: 0,
+    loadSeq: 0,
+    activeSeq: 0,
+    rowTemplate: null,
   };
   var categories = null;
   var catMenu = null;
@@ -458,8 +461,12 @@
     var header = area ? area.querySelector(".group_8") : null;
     if (!header) return null;
     var row = header.nextElementSibling;
-    if (!row) return null;
-    return { header: header, row: row.cloneNode(true) };
+    while (row && (row.id === "picaiGoodsEmpty" || row.id === "picaiGoodsPagination")) {
+      row = row.nextElementSibling;
+    }
+    if (row) state.rowTemplate = row.cloneNode(true);
+    if (!state.rowTemplate) return null;
+    return { header: header, row: state.rowTemplate.cloneNode(true) };
   }
 
   function clearRows(tpl) {
@@ -677,6 +684,8 @@
   }
 
   async function load() {
+    var seq = ++state.loadSeq;
+    state.activeSeq = seq;
     var area = findGoodsArea();
     var tpl = parseTemplate(area);
     if (!tpl) return;
@@ -685,11 +694,13 @@
     renderPagination(area);
 
     var cartKeys = await getCartKeys();
+    if (seq != state.activeSeq) return;
 
     var resp = await $.apiPost(
       "/api/wholesales/goods.php?action=lists",
       $.withAuth({ page: state.page, size: state.reqSize, keywords: state.keywords, lang: "zh_cn", cat_id: state.catId })
     );
+    if (seq != state.activeSeq) return;
     if (String(resp.code) === "2") {
       $.clearAuth();
       showMsg("登录已失效，请重新登录", { autoCloseMs: 900 });
@@ -697,6 +708,7 @@
       return;
     }
     if (String(resp.code) !== "0") {
+      if (seq != state.activeSeq) return;
       showMsg((resp && resp.msg) || "加载失败");
       ensureEmpty(tpl, "加载失败");
       return;

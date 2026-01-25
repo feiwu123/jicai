@@ -59,7 +59,7 @@
       name: values.name,
       company: values.company || "",
       postCode: values.postCode,
-      mailBox: "",
+      mailBox: values.mailBox || "",
       mobile: values.mobile || mobileOrPhone,
       phone: values.phone || mobileOrPhone,
       countryCode: values.countryCode,
@@ -285,6 +285,11 @@
 
     var addrs = (resp.data && (resp.data.list || resp.data.lists || resp.data)) || [];
     if (addrs && !Array.isArray(addrs)) addrs = [addrs];
+    addrs = addrs.filter(function (a) {
+      if (!a) return false;
+      var uid = a.user_id != null ? a.user_id : a.userId != null ? a.userId : a.userid;
+      return String(uid) !== "0";
+    });
     renderAddresses(addrs);
   }
 

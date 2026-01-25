@@ -199,6 +199,46 @@
   color: rgba(153, 153, 153, 1) !important;
 }
 
+/* Consignee info: two-column grid aligned left, matching address modal layout */
+#picaiOrderDetail .picai-consignee-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+  row-gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+}
+
+#picaiOrderDetail .picai-consignee-field,
+#picaiOrderDetail .picai-consignee-full {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  color: rgba(0, 0, 0, 1);
+  font-size: 14px;
+  font-family: PingFang SC-Regular;
+  line-height: 20px;
+  margin-left: 24px;
+}
+
+#picaiOrderDetail .picai-consignee-field .label,
+#picaiOrderDetail .picai-consignee-full .label {
+  color: rgba(84, 98, 116, 1);
+  white-space: nowrap;
+}
+
+#picaiOrderDetail .picai-consignee-field .value,
+#picaiOrderDetail .picai-consignee-full .value {
+  color: rgba(24, 31, 39, 1);
+  word-break: break-word;
+}
+
+#picaiOrderDetail .picai-consignee-full {
+  margin-top: 12px;
+}
+
 #picaiOrderDetail .picai-order-detail-content .group_4 .text-wrapper_3.picai-step--active .text_13,
 #picaiOrderDetail .picai-order-detail-content .group_4 .text-wrapper_4.picai-step--active .text_14,
 #picaiOrderDetail .picai-order-detail-content .group_4 .text-wrapper_5.picai-step--active .text_15 {
@@ -487,11 +527,13 @@
 #picaiOrderDetail .picai-order-detail-content .group_8 .picai-goods-table .col-unit {
   width: 15%;
   min-width: 100px;
+  text-align: left;
 }
 
 #picaiOrderDetail .picai-order-detail-content .group_8 .picai-goods-table .col-total {
   width: 15%;
   min-width: 100px;
+  text-align: left;
 }
 
 #picaiOrderDetail .picai-order-detail-content .group_8 .picai-goods-name {

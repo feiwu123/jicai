@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   var $ = window.picai;
   if (!$) return;
 
@@ -74,29 +74,35 @@
       "    </div>" +
       '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
+      '        <div class="addr-modal-label"><span>Email</span></div>' +
+      '        <input class="addr-modal-input" data-role="mailBox" autocomplete="email" />' +
+      "      </div>" +
+      '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>国家三字码</span></div>' +
       '        <input class="addr-modal-input" data-role="countryCode" placeholder="如：MEX" />' +
       "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>邮政编码</span></div>' +
       '        <input class="addr-modal-input" data-role="postCode" autocomplete="postal-code" />' +
       "      </div>" +
-      "    </div>" +
-      '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>州/省</span></div>' +
       '        <input class="addr-modal-input" data-role="prov" />' +
       "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>城市</span></div>' +
       '        <input class="addr-modal-input" data-role="city" />' +
       "      </div>" +
-      "    </div>" +
-      '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>区域</span></div>' +
       '        <input class="addr-modal-input" data-role="area" />' +
       "      </div>" +
+      "    </div>" +
+      '    <div class="addr-modal-row">' +
       '      <div class="addr-modal-field">' +
       '        <div class="addr-modal-label"><span class="req">*</span><span>详细地址</span></div>' +
       '        <input class="addr-modal-input" data-role="address" autocomplete="street-address" />' +
@@ -140,7 +146,7 @@
       "system-ui, -apple-system, Segoe UI, Roboto, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif";
 
     var text = document.createElement("div");
-    text.textContent = "正在提交…";
+    text.textContent = "正在提交...";
     text.style.fontSize = "14px";
     text.style.color = "#1f2a44";
     text.style.lineHeight = "1.5";
@@ -178,6 +184,7 @@
     var companyEl = qs("company");
     var mobileEl = qs("mobile");
     var phoneEl = qs("phone");
+    var mailBoxEl = qs("mailBox");
     var countryCodeEl = qs("countryCode");
     var postCodeEl = qs("postCode");
     var provEl = qs("prov");
@@ -197,6 +204,7 @@
     setVal(companyEl, initial.company || "");
     setVal(mobileEl, initial.mobile || initial.phone || "");
     setVal(phoneEl, initial.phone || "");
+    setVal(mailBoxEl, initial.mailBox || initial.mail_box || initial.mailbox || "");
     setVal(countryCodeEl, initial.countryCode || initial.country_code || "MEX");
     setVal(postCodeEl, initial.postCode || initial.post_code || "");
     setVal(provEl, initial.prov || "");
@@ -248,6 +256,7 @@
           company: readTrim(companyEl),
           mobile: readTrim(mobileEl),
           phone: readTrim(phoneEl),
+          mailBox: readTrim(mailBoxEl),
           countryCode: readTrim(countryCodeEl) || "MEX",
           postCode: readTrim(postCodeEl),
           prov: readTrim(provEl),
