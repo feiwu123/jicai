@@ -138,9 +138,11 @@
       ".picai-status-badge--os2{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}" +
       ".picai-status-badge--os3{color:#334155;background:rgba(148,163,184,0.22);border-color:rgba(148,163,184,0.35)}" +
       ".picai-status-badge--os4{color:#6b21a8;background:rgba(168,85,247,0.16);border-color:rgba(168,85,247,0.32)}" +
+      ".picai-status-badge--os8{color:#6b21a8;background:rgba(168,85,247,0.16);border-color:rgba(168,85,247,0.32)}" +
       ".picai-status-badge--ps0{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}" +
       ".picai-status-badge--ps1{color:#1e3a8a;background:rgba(59,130,246,0.16);border-color:rgba(59,130,246,0.32)}" +
       ".picai-status-badge--ps2{color:#166534;background:rgba(34,197,94,0.16);border-color:rgba(34,197,94,0.35)}" +
+      ".picai-status-badge--ps4{color:#6b21a8;background:rgba(168,85,247,0.16);border-color:rgba(168,85,247,0.32)}" +
       ".picai-status-badge--ss0{color:#334155;background:rgba(148,163,184,0.22);border-color:rgba(148,163,184,0.35)}" +
       ".picai-status-badge--ss1{color:#1e3a8a;background:rgba(59,130,246,0.16);border-color:rgba(59,130,246,0.32)}" +
       ".picai-status-badge--ss2{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}" +
@@ -164,9 +166,26 @@
     var ps = String((order && order.pay_status) != null ? order.pay_status : "");
     var ss = String((order && order.shipping_status) != null ? order.shipping_status : "");
 
-    var orderMap = { "0": "未确认", "1": "已确认", "2": "已取消", "3": "无效", "4": "退货" };
-    var payMap = { "0": "未付款", "1": "已付款中", "2": "已付款" };
-    var shipMap = { "0": "未发货", "1": "已发货", "2": "已取消", "3": "备货中" };
+    var orderMap = {
+      "0": "未确认",
+      "1": "已确认",
+      "2": "已取消",
+      "3": "无效",
+      "4": "退货",
+      "8": "仅退款",
+    };
+    var payMap = {
+      "0": "未付款",
+      "1": "已付款中",
+      "2": "已付款",
+      "4": "已退款",
+    };
+    var shipMap = {
+      "0": "未发货",
+      "1": "已发货",
+      "2": "已取消",
+      "3": "备货中",
+    };
 
     host.textContent = "";
     host.classList.add("picai-status-badges");

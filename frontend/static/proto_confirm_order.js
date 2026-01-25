@@ -1425,7 +1425,16 @@
   async function createOrder() {
     if (!cartValue) return;
     if (isSubmitting) return;
-    var submitAddressId = selectedAddressId === "TOPM" ? "0" : String(selectedAddressId || "");
+    var submitAddressId = "";
+    if (selectedAddressId === "TOPM") {
+      var topmId = selectedAddress && selectedAddress.address_id != null ? selectedAddress.address_id : null;
+      if (topmId == null && topmAddressCache && topmAddressCache.address_id != null) {
+        topmId = topmAddressCache.address_id;
+      }
+      submitAddressId = topmId != null ? String(topmId) : "";
+    } else {
+      submitAddressId = String(selectedAddressId || "");
+    }
     if (!submitAddressId) {
       showMsg("请选择收货地址");
       return;
