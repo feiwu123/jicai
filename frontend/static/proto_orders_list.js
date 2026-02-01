@@ -154,6 +154,8 @@
     orderStatus: "0",
   };
   var templateCache = null;
+  var refundReasonCache = null;
+  var refundReasonPromise = null;
 
   function ensureStatusStyles() {
     var id = "picaiOrdersStatusStyle";
@@ -173,11 +175,13 @@
       ".picai-status-badge--ps0{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}" +
       ".picai-status-badge--ps1{color:#1e3a8a;background:rgba(59,130,246,0.16);border-color:rgba(59,130,246,0.32)}" +
       ".picai-status-badge--ps2{color:#166534;background:rgba(34,197,94,0.16);border-color:rgba(34,197,94,0.35)}" +
+      ".picai-status-badge--ps6{color:#92400e;background:rgba(245,158,11,0.16);border-color:rgba(245,158,11,0.35)}" +
       ".picai-status-badge--ps4{color:#6b21a8;background:rgba(168,85,247,0.16);border-color:rgba(168,85,247,0.32)}" +
       ".picai-status-badge--ss0{color:#334155;background:rgba(148,163,184,0.22);border-color:rgba(148,163,184,0.35)}" +
       ".picai-status-badge--ss1{color:#1e3a8a;background:rgba(59,130,246,0.16);border-color:rgba(59,130,246,0.32)}" +
       ".picai-status-badge--ss2{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}" +
-      ".picai-status-badge--ss3{color:#92400e;background:rgba(245,158,11,0.16);border-color:rgba(245,158,11,0.35)}";
+      ".picai-status-badge--ss3{color:#92400e;background:rgba(245,158,11,0.16);border-color:rgba(245,158,11,0.35)}" +
+      ".picai-status-badge--ss444{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}";
     document.head.appendChild(style);
   }
 
@@ -209,9 +213,16 @@
       "0": "\u672a\u4ed8\u6b3e",
       "1": "\u5df2\u4ed8\u6b3e\u4e2d",
       "2": "\u5df2\u4ed8\u6b3e",
+      "6": "\u9000\u6b3e\u7533\u8bf7\u4e2d",
       "4": "\u5df2\u9000\u6b3e",
     };
-    var shipMap = { "0": "\u672a\u53d1\u8d27", "1": "\u5df2\u53d1\u8d27", "2": "\u5df2\u53d6\u6d88", "3": "\u5907\u8d27\u4e2d" };
+    var shipMap = {
+      "0": "\u672a\u53d1\u8d27",
+      "1": "\u5df2\u53d1\u8d27",
+      "2": "\u5df2\u53d6\u6d88",
+      "3": "\u5907\u8d27\u4e2d",
+      "444": "\u83b7\u53d6\u7269\u6d41\u5355\u53f7\u5931\u8d25",
+    };
 
     host.textContent = "";
     host.classList.add("picai-status-badges");
@@ -449,6 +460,379 @@
         });
       } catch (e) {
         if (listEl) listEl.innerHTML = '<div class="picai-trace-empty">网络错误</div>';
+      }
+    })();
+  }
+
+  function extractMoneyValue(value) {
+    if (value == null) return "";
+    var str = String(value).trim();
+    if (!str) return "";
+    var match = str.replace(/,/g, "").match(/-?\d+(?:\.\d+)?/);
+    return match ? match[0] : "";
+  }
+
+  function getOrderRefundAmount(order) {
+    var raw = "";
+    if (order && order.total_fee != null && order.total_fee !== "") raw = String(order.total_fee);
+    else if (order && order.operate_amount != null && order.operate_amount !== "") raw = String(order.operate_amount);
+
+    var formatted = "";
+    if (order && order.format_total_fee) formatted = String(order.format_total_fee);
+    else if (order && order.format_operate_amount) formatted = String(order.format_operate_amount);
+
+    var display = formatted || (raw ? ($.formatMoneyMXN ? $.formatMoneyMXN(raw, { fallback: raw }) : raw) : "--");
+    var value = raw || extractMoneyValue(formatted);
+    return { display: display || "--", value: value || "" };
+  }
+
+  function normalizeReasonItem(item, idx) {
+    if (item == null) return null;
+    if (typeof item === "string" || typeof item === "number") {
+      var s = String(item);
+      return { value: s, label: s };
+    }
+    if (typeof item === "object") {
+      var value =
+        item.value != null
+          ? item.value
+          : item.id != null
+          ? item.id
+          : item.reason_id != null
+          ? item.reason_id
+          : item.refund_reason != null
+          ? item.refund_reason
+          : item.reason != null
+          ? item.reason
+          : item.key;
+      var label =
+        item.label != null
+          ? item.label
+          : item.title != null
+          ? item.title
+          : item.name != null
+          ? item.name
+          : item.reason_desc != null
+          ? item.reason_desc
+          : item.desc != null
+          ? item.desc
+          : item.refund_desc != null
+          ? item.refund_desc
+          : item.reason;
+      if (value == null && label != null) value = label;
+      if (label == null && value != null) label = value;
+      if (value == null && label == null) {
+        var keys = Object.keys(item);
+        if (keys.length) {
+          value = item[keys[0]];
+          label = item[keys[0]];
+        }
+      }
+      if (value == null && label == null) return null;
+      return { value: String(value), label: String(label) };
+    }
+    return null;
+  }
+
+  function normalizeReasonList(data) {
+    if (!data) return [];
+    var list = data;
+    if (!Array.isArray(list) && typeof list === "object") {
+      if (Array.isArray(list.list)) list = list.list;
+      else if (Array.isArray(list.lists)) list = list.lists;
+      else if (Array.isArray(list.data)) list = list.data;
+      else if (Array.isArray(list.reason)) list = list.reason;
+      else if (Array.isArray(list.reasons)) list = list.reasons;
+      else if (Array.isArray(list.items)) list = list.items;
+      else list = Object.keys(list).map(function (k) {
+        return { value: k, label: list[k] };
+      });
+    }
+    if (!Array.isArray(list)) return [];
+    var out = [];
+    list.forEach(function (item, idx) {
+      var n = normalizeReasonItem(item, idx);
+      if (n) out.push(n);
+    });
+    return out;
+  }
+
+  function isOtherReason(value, label) {
+    var text = (label || value || "").toString().toLowerCase();
+    if (!text) return false;
+    return text.indexOf("\u5176\u4ed6") >= 0 || text.indexOf("other") >= 0;
+  }
+
+  async function fetchRefundReasons() {
+    if (refundReasonCache && refundReasonCache.length) return refundReasonCache;
+    if (refundReasonPromise) return refundReasonPromise;
+    refundReasonPromise = (async function () {
+      var resp = await $.apiPost("/api/wholesales/refund.php?action=reason", $.withAuth({}));
+      if (String(resp && resp.code) === "2") {
+        $.clearAuth();
+        showMsg("\u767b\u5f55\u5df2\u5931\u6548\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55", { autoCloseMs: 1200 });
+        location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
+        return [];
+      }
+      if (String(resp && resp.code) !== "0") {
+        throw new Error((resp && resp.msg) || "\u83b7\u53d6\u9000\u6b3e\u7406\u7531\u5931\u8d25");
+      }
+      var list = normalizeReasonList(resp && resp.data);
+      refundReasonCache = list;
+      return list;
+    })();
+    try {
+      return await refundReasonPromise;
+    } finally {
+      refundReasonPromise = null;
+    }
+  }
+
+  function ensureRefundModal() {
+    var existing = document.getElementById("picaiRefundModal");
+    if (existing) return existing;
+
+    var styleId = "picaiRefundModalStyle";
+    if (!document.getElementById(styleId)) {
+      var style = document.createElement("style");
+      style.id = styleId;
+      style.textContent =
+        "" +
+        ".picai-refund-modal{position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:10003;display:none;align-items:center;justify-content:center;padding:24px}" +
+        ".picai-refund-panel{width:min(520px,92vw);background:#fff;border-radius:16px;border:1px solid rgba(15,23,42,0.08);box-shadow:0 24px 80px rgba(15,23,42,0.28);display:flex;flex-direction:column;max-height:90vh}" +
+        ".picai-refund-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px 18px}" +
+        ".picai-refund-title{font-size:16px;font-weight:700;color:#0f172a}" +
+        ".picai-refund-close{border:0;background:transparent;font-size:20px;line-height:20px;cursor:pointer;color:#64748b}" +
+        ".picai-refund-body{padding:0 18px 16px 18px;overflow:auto}" +
+        ".picai-refund-tip{font-size:13px;color:#475569;margin-bottom:12px}" +
+        ".picai-refund-info{background:rgba(248,250,252,1);border:1px solid rgba(226,232,240,1);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr;row-gap:6px;column-gap:8px;margin-bottom:14px;font-size:13px;color:#0f172a}" +
+        ".picai-refund-info .label{color:#64748b}" +
+        ".picai-refund-label{display:block;font-size:13px;color:#0f172a;margin:10px 0 6px 0;font-weight:600}" +
+        ".picai-refund-select,.picai-refund-textarea{width:100%;box-sizing:border-box;border-radius:10px;border:1px solid rgba(148,163,184,0.6);padding:10px 12px;font-size:13px;font-family:inherit;outline:none}" +
+        ".picai-refund-select:focus,.picai-refund-textarea:focus{border-color:#3b83f6;box-shadow:0 0 0 3px rgba(59,131,246,0.15)}" +
+        ".picai-refund-textarea{min-height:80px;resize:vertical}" +
+        ".picai-refund-hint{font-size:12px;color:#64748b;margin-top:6px}" +
+        ".picai-refund-error{font-size:12px;color:#e11d48;margin-top:6px;min-height:16px}" +
+        ".picai-refund-actions{display:flex;justify-content:flex-end;gap:10px;padding:0 18px 16px 18px}" +
+        ".picai-refund-actions button{border-radius:10px;padding:10px 14px;font-size:13px;cursor:pointer}" +
+        ".picai-refund-cancel{border:1px solid rgba(148,163,184,0.6);background:#fff;color:#0f172a}" +
+        ".picai-refund-submit{border:0;background:#e8457a;color:#fff;box-shadow:0 10px 24px rgba(232,69,122,0.24)}" +
+        ".picai-refund-submit[disabled]{opacity:0.6;cursor:default;box-shadow:none}" +
+        "";
+      document.head.appendChild(style);
+    }
+
+    var modal = document.createElement("div");
+    modal.id = "picaiRefundModal";
+    modal.className = "picai-refund-modal";
+    modal.innerHTML =
+      "" +
+      '<div class="picai-refund-panel" role="dialog" aria-modal="true" aria-label="申请退款">' +
+      '<div class="picai-refund-header">' +
+      '<div class="picai-refund-title">申请退款</div>' +
+      '<button type="button" class="picai-refund-close" aria-label="关闭">×</button>' +
+      "</div>" +
+      '<div class="picai-refund-body">' +
+      '<div class="picai-refund-tip">请确认是否对该订单申请退款。</div>' +
+      '<div class="picai-refund-info">' +
+      '<span class="label">订单号</span><span id="picaiRefundOrderSn">--</span>' +
+      '<span class="label">订单金额</span><span id="picaiRefundAmount">--</span>' +
+      "</div>" +
+      '<label class="picai-refund-label" for="picaiRefundReason">退款理由</label>' +
+      '<select class="picai-refund-select" id="picaiRefundReason"></select>' +
+      '<label class="picai-refund-label" for="picaiRefundDesc">退款说明 / 备注</label>' +
+      '<textarea class="picai-refund-textarea" id="picaiRefundDesc" placeholder="请输入退款说明"></textarea>' +
+      '<div class="picai-refund-hint" id="picaiRefundDescHint"></div>' +
+      '<div class="picai-refund-error" id="picaiRefundError"></div>' +
+      "</div>" +
+      '<div class="picai-refund-actions">' +
+      '<button type="button" class="picai-refund-cancel">取消</button>' +
+      '<button type="button" class="picai-refund-submit">确认退款</button>' +
+      "</div>" +
+      "</div>";
+
+    modal.addEventListener("click", function () {
+      hideRefundModal();
+    });
+    var panel = modal.querySelector(".picai-refund-panel");
+    if (panel) {
+      panel.addEventListener("click", function (e) {
+        e.stopPropagation();
+      });
+    }
+
+    var closeBtn = modal.querySelector(".picai-refund-close");
+    var cancelBtn = modal.querySelector(".picai-refund-cancel");
+    if (closeBtn) closeBtn.addEventListener("click", hideRefundModal);
+    if (cancelBtn) cancelBtn.addEventListener("click", hideRefundModal);
+
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  function hideRefundModal() {
+    var modal = document.getElementById("picaiRefundModal");
+    if (!modal) return;
+    modal.style.display = "none";
+    document.body.style.overflow = "";
+  }
+
+  function setRefundError(msg) {
+    var el = document.getElementById("picaiRefundError");
+    if (el) el.textContent = msg || "";
+  }
+
+  function updateRefundDescHint() {
+    var select = document.getElementById("picaiRefundReason");
+    var hint = document.getElementById("picaiRefundDescHint");
+    if (!select || !hint) return;
+    var option = select.options[select.selectedIndex];
+    var label = option ? option.textContent : "";
+    var other = isOtherReason(select.value, label);
+    hint.textContent = other ? "选择“其他”时需填写退款说明。" : "选择“其他”时为必填，其他为选填。";
+  }
+
+  function populateRefundReasons(select, list) {
+    if (!select) return;
+    select.innerHTML = "";
+    var placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = list && list.length ? "请选择退款理由" : "暂无退款理由";
+    select.appendChild(placeholder);
+    (list || []).forEach(function (item) {
+      var opt = document.createElement("option");
+      opt.value = item.value;
+      opt.textContent = item.label;
+      select.appendChild(opt);
+    });
+  }
+
+  function showRefundModal(order) {
+    var modal = ensureRefundModal();
+    modal._order = order || {};
+    var snEl = modal.querySelector("#picaiRefundOrderSn");
+    var amountEl = modal.querySelector("#picaiRefundAmount");
+    var reasonEl = modal.querySelector("#picaiRefundReason");
+    var descEl = modal.querySelector("#picaiRefundDesc");
+    var submitBtn = modal.querySelector(".picai-refund-submit");
+
+    var sn = order && order.order_sn ? String(order.order_sn) : "";
+    if (snEl) snEl.textContent = sn || "--";
+
+    var amountInfo = getOrderRefundAmount(order || {});
+    modal._refundAmountValue = amountInfo.value || "";
+    if (amountEl) amountEl.textContent = amountInfo.display || "--";
+
+    if (descEl) descEl.value = "";
+    setRefundError("");
+
+    if (reasonEl) {
+      reasonEl.disabled = true;
+      reasonEl.innerHTML = '<option value="">加载中...</option>';
+    }
+
+    updateRefundDescHint();
+
+    if (reasonEl && !reasonEl._picaiBound) {
+      reasonEl.addEventListener("change", function () {
+        updateRefundDescHint();
+        setRefundError("");
+      });
+      reasonEl._picaiBound = true;
+    }
+
+    if (descEl && !descEl._picaiBound) {
+      descEl.addEventListener("input", function () {
+        setRefundError("");
+      });
+      descEl._picaiBound = true;
+    }
+
+    if (submitBtn && !submitBtn._picaiBound) {
+      submitBtn.addEventListener("click", function () {
+        (async function () {
+          var orderData = modal._order || {};
+          var reasonSelect = modal.querySelector("#picaiRefundReason");
+          var descInput = modal.querySelector("#picaiRefundDesc");
+          var reasonValue = reasonSelect ? String(reasonSelect.value || "") : "";
+          var reasonLabel = "";
+          if (reasonSelect && reasonSelect.selectedIndex >= 0) {
+            var opt = reasonSelect.options[reasonSelect.selectedIndex];
+            reasonLabel = opt ? opt.textContent : "";
+          }
+          var desc = descInput ? String(descInput.value || "").trim() : "";
+
+          if (!orderData || !orderData.order_id) {
+            setRefundError("缺少订单ID");
+            return;
+          }
+          if (!reasonValue) {
+            setRefundError("请选择退款理由");
+            return;
+          }
+          if (isOtherReason(reasonValue, reasonLabel) && !desc) {
+            setRefundError("选择“其他”时请填写退款说明");
+            return;
+          }
+          var refundAmount = modal._refundAmountValue || "";
+          if (!refundAmount) {
+            setRefundError("无法获取退款金额");
+            return;
+          }
+
+          submitBtn.disabled = true;
+          var originalText = submitBtn.textContent;
+          submitBtn.textContent = "提交中...";
+          try {
+            var resp = await $.apiPost(
+              "/api/wholesales/refund.php?action=apply",
+              $.withAuth({
+                order_id: String(orderData.order_id),
+                refund_reason: reasonValue,
+                refund_amount: refundAmount,
+                refund_desc: desc,
+              })
+            );
+            if (String(resp && resp.code) === "2") {
+              $.clearAuth();
+              showMsg("登录已失效，请重新登录", { autoCloseMs: 1200 });
+              location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
+              return;
+            }
+            if (String(resp && resp.code) === "0") {
+              hideRefundModal();
+              showMsg((resp && resp.msg) || "退款申请已提交", { autoCloseMs: 2000 });
+              try {
+                load();
+              } catch (e) {}
+              refreshBalance();
+            } else {
+              setRefundError((resp && resp.msg) || "退款申请失败");
+            }
+          } catch (e) {
+            setRefundError("网络错误，请稍后重试");
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText || "确认退款";
+          }
+        })();
+      });
+      submitBtn._picaiBound = true;
+    }
+
+    modal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+
+    (async function () {
+      try {
+        var list = await fetchRefundReasons();
+        populateRefundReasons(reasonEl, list);
+        if (reasonEl) reasonEl.disabled = false;
+        updateRefundDescHint();
+      } catch (e) {
+        populateRefundReasons(reasonEl, []);
+        if (reasonEl) reasonEl.disabled = true;
+        setRefundError((e && e.message) || "退款理由加载失败");
       }
     })();
   }
@@ -896,59 +1280,7 @@
       refundBtn.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        (async function refundOrder() {
-          if (!order || !order.order_id) {
-            showMsg("\u7f3a\u5c11\u8ba2\u5355ID");
-            return;
-          }
-
-          var ok = true;
-          if ($ && $.showModalConfirm) {
-            ok = await $.showModalConfirm("\u786e\u5b9e\u9700\u8981\u9000\u6b3e\u5417\uff1f", {
-              title: "\u9000\u6b3e\u786e\u8ba4",
-              confirmText: "\u786e\u5b9a\u9000\u6b3e",
-              cancelText: "\u53d6\u6d88",
-              danger: true,
-            });
-          } else {
-            ok = confirm("\u786e\u5b9e\u9700\u8981\u9000\u6b3e\u5417\uff1f");
-          }
-          if (!ok) return;
-
-          var original = refundBtn ? refundBtn.textContent : "";
-          if (refundBtn) {
-            refundBtn.textContent = "\u5904\u7406\u4e2d\u2026";
-            refundBtn.style.pointerEvents = "none";
-            refundBtn.style.opacity = "0.75";
-          }
-          try {
-            var resp = await $.apiPost(
-              "/api/wholesales/orders.php?action=refund",
-              $.withAuth({ order_id: String(order.order_id) })
-            );
-            if (String(resp.code) === "2") {
-              $.clearAuth();
-              showMsg("\u767b\u5f55\u5df2\u5931\u6548\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55", { autoCloseMs: 1200 });
-              location.replace($.toUrl ? $.toUrl("/login.html") : "/login.html");
-              return;
-            }
-            if (String(resp.code) === "0") {
-              showMsg((resp && resp.msg) || "\u9000\u6b3e\u6210\u529f", { autoCloseMs: 2000 });
-              try {
-                load();
-              } catch (e) {}
-              refreshBalance();
-            } else {
-              showMsg((resp && resp.msg) || "\u9000\u6b3e\u5931\u8d25", { autoCloseMs: 3000 });
-            }
-          } finally {
-            if (refundBtn) {
-              refundBtn.textContent = original || "\u9000\u6b3e";
-              refundBtn.style.pointerEvents = "";
-              refundBtn.style.opacity = "";
-            }
-          }
-        })();
+        showRefundModal(order || {});
       });
     }
 

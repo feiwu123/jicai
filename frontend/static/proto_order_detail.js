@@ -142,11 +142,13 @@
       ".picai-status-badge--ps0{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}" +
       ".picai-status-badge--ps1{color:#1e3a8a;background:rgba(59,130,246,0.16);border-color:rgba(59,130,246,0.32)}" +
       ".picai-status-badge--ps2{color:#166534;background:rgba(34,197,94,0.16);border-color:rgba(34,197,94,0.35)}" +
+      ".picai-status-badge--ps6{color:#92400e;background:rgba(245,158,11,0.16);border-color:rgba(245,158,11,0.35)}" +
       ".picai-status-badge--ps4{color:#6b21a8;background:rgba(168,85,247,0.16);border-color:rgba(168,85,247,0.32)}" +
       ".picai-status-badge--ss0{color:#334155;background:rgba(148,163,184,0.22);border-color:rgba(148,163,184,0.35)}" +
       ".picai-status-badge--ss1{color:#1e3a8a;background:rgba(59,130,246,0.16);border-color:rgba(59,130,246,0.32)}" +
       ".picai-status-badge--ss2{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}" +
-      ".picai-status-badge--ss3{color:#92400e;background:rgba(245,158,11,0.16);border-color:rgba(245,158,11,0.35)}";
+      ".picai-status-badge--ss3{color:#92400e;background:rgba(245,158,11,0.16);border-color:rgba(245,158,11,0.35)}" +
+      ".picai-status-badge--ss444{color:#991b1b;background:rgba(239,68,68,0.14);border-color:rgba(239,68,68,0.32)}";
     document.head.appendChild(style);
   }
 
@@ -178,6 +180,7 @@
       "0": "未付款",
       "1": "已付款中",
       "2": "已付款",
+      "6": "退款申请中",
       "4": "已退款",
     };
     var shipMap = {
@@ -185,6 +188,7 @@
       "1": "已发货",
       "2": "已取消",
       "3": "备货中",
+      "444": "获取物流单号失败",
     };
 
     host.textContent = "";
